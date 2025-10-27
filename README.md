@@ -1,96 +1,100 @@
-# ACP — Autonomous Command Protocol
+# ACP — Autonomous Command Protocol (C99 Reference)
 
-**ACP** is a lightweight, cross-platform communication protocol designed for secure, deterministic data exchange between autonomous systems, such as unmanned vehicles, ground control stations, and diagnostic interfaces.
+ACP is a small, portable protocol and C99 library for framing, authenticating, and parsing telemetry and command messages across Linux, macOS, Windows (MinGW), and embedded systems.
 
-This repository provides the **official C reference implementation** of ACP, suitable for embedded firmware, CLI telemetry tools, and cross-platform integration (e.g., Linux, RTOS, or macOS).
+This repository contains the reference C implementation with platform shims, tests, and documentation. It follows the ACP Constitution: portability first, minimal and deterministic, security by design, extensible but stable, open and testable.
 
----
+## Highlights
 
-## 🎯 Purpose
+- COBS framing + CRC16-CCITT integrity
+- HMAC-SHA256 authentication (16-byte truncated) with constant-time verification
+- Command frames MUST be authenticated and replay-protected
+- Zero-heap default (compile-time opt-in for heap if needed)
+- Network byte order on the wire; packed headers; explicit versioning
+- Max payload: 1024 bytes per frame
+- Platform shims for logging, time, mutex, keystore (POSIX and Windows fallbacks)
 
-The goal of ACP is to define a **simple, robust binary protocol** that ensures:
+## Repository structure
 
-- ✅ Low-latency telemetry streaming
-- ✅ Reliable field diagnostics over serial or radio links
-- ✅ Cross-language, cross-platform compatibility
-- ✅ Integration into mission-critical systems (e.g., GCS, drones, Lattice OS)
+```text
+.
+├── acp_constants.c
+├── acp_crypto.c                # HMAC-SHA256 and constant-time utilities
+├── acp_framer.c                # COBS framing + CRC16 integration
+├── acp_nvs.c                   # Default file-based keystore backend ("NVS")
+├── acp_platform_keystore.h     # Platform shim headers
+├── acp_platform_log.h
+├── acp_platform_mutex.h
+├── acp_platform_time.h
+├── acp_session.c               # Session state + replay protection
+├── docs/
+│   └── acp_comm_spec_v0-3.md   # Protocol framing spec
+├── examples/                   # Example apps (to be added)
+└── tests/                      # Unit tests and vectors (to be added)
+```
 
----
+Note: Build system files (Makefile, CMakeLists.txt) and example sources are planned in tasks and may not exist yet on this branch.
 
-## 🔧 Features
+## Build (planned targets)
 
-- 🧱 Fixed-size binary frame format
-- 🛰️ Support for telemetry, command, and system messages
-- 🧩 Lightweight and dependency-free C implementation
-- 🔐 Optional CRC / future support for authenticated frames
-- 🧪 Test vectors and mock ACP generator included
+Two build systems will be supported:
 
----
+- Make: builds static and shared libraries on Linux/macOS; static on Windows (MinGW)
+- CMake: portable configuration, install targets, and example builds
 
-## 📦 Repository Structure
+Artifacts:
 
-```plaintext
-acp/
-├── acp.h            # Frame definition, structs, constants
-├── acp.c            # Encoding/decoding logic
-├── test_acp.c       # CLI tool for decoding test frames
-├── spec/
-│   ├── acp-v1.0.md  # Protocol documentation
-│   └── examples/    # Example frame diagrams and field notes
-├── tests/
-│   └── vectors.json # Reference vectors for conformance
-├── Makefile         # Build for Linux/macOS
-├── LICENSE          # MIT License
-└── README.md        # This file
+- Linux/macOS: libacp.a and libacp.so/.dylib
+- Windows (MinGW): static library for this release
 
+Configuration flags:
 
-⸻
+- ACP_NO_HEAP=ON by default: disallow malloc/calloc/realloc/free in core paths
+- Optional feature flags to enable heap-dependent paths explicitly
 
-🚀 Quick Start
+After T001/T002 are implemented, typical flows:
 
-🧪 Build and run decoder tool:
-
-git clone https://github.com/pzanna/acp.git
-cd acp
+```sh
+# Using Make (once Makefile is added)
 make
-./test_acp vectors/test-frame.bin
 
-Note: this repo is pure C. No external dependencies.
+# Using CMake (once CMakeLists.txt is added)
+cmake -S . -B build -DCMAKE_BUILD_TYPE=Release -DACP_NO_HEAP=ON
+cmake --build build --config Release
+```
 
-⸻
+## Security policy (command vs telemetry)
 
-💡 Usage
+- Command frames: MUST carry a 16-byte truncated HMAC-SHA256 tag and are subject to replay protection; unauthenticated or replayed command frames are rejected.
+- Telemetry frames: MAY be unauthenticated if explicitly configured; authentication is recommended.
+- Keystore: default file-based backend provided in `acp_nvs.c`; integrators may override via platform shim.
 
-Include in your C project:
+## Data model and wire format
 
-#include "acp.h"
+- Network byte order (big-endian) on the wire
+- Packed header with explicit version field
+- CRC16-CCITT over framed content
+- Optional HMAC tag (16 bytes) when authentication is enabled; mandatory for commands
 
-acp_telemetry_t frame;
-if (acp_decode_telemetry(buffer, len, &frame)) {
-    printf("CPU Temp: %.2f C\n", frame.cpu_temp_c);
-}
+See `docs/acp_comm_spec_v0-3.md` and `specs/001-acp-protocol-spec/spec.md` for details.
 
-Link:
+## Examples and tests
 
-Add acp.c to your project and include acp.h. No dynamic allocation or platform dependencies.
+Planned and tracked in `specs/001-acp-protocol-spec/tasks.md`:
 
-⸻
+- Round-trip encode/decode tests (COBS + CRC16)
+- CRC16 known vectors
+- HMAC vectors and negative tests (bad/absent tags on commands)
+- Replay rejection tests
+- Byte-order conformance tests
+- Example apps: `acp_client.c`, `mock_serial.c`
 
-📘 Protocol Overview
+## API status
 
-ACP frames are:
- • Versioned (uint8_t version)
- • Typed (e.g., ACP_FRAME_TELEMETRY)
- • Packed binary for minimal overhead
- • CRC protected (optional)
- • Little or big endian (TBD; configurable)
+The public API header `acp_protocol.h` and versioning header will be introduced per tasks (T009–T012). A draft of the API is available in `specs/001-acp-protocol-spec/contracts/c-api.md`.
 
-See docs/acp_comm_spec_v0-3.md for full framing structure.
+## License
 
-⸻
-
-📜 License
-
-This project is licensed under the MIT License.
+MIT License
 
 Copyright (c) 2025 Northbound Networks Pty. Ltd.

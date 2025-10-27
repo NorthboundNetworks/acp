@@ -16,6 +16,7 @@ This tasks file is organized by phases and user stories. Tasks are immediately e
 - [ ] T006 Create examples skeleton in /Users/paulzanna/Github/acp/examples/mock_serial.c
 - [ ] T007 Create tests build config (CMakeLists or Makefile) in /Users/paulzanna/Github/acp/tests/CMakeLists.txt
 - [ ] T008 [P] Add README build matrix section in /Users/paulzanna/Github/acp/README.md
+- [ ] T057 [Build] Add compile flag ACP_NO_HEAP (default ON) to fail builds on heap usage in /Users/paulzanna/Github/acp/CMakeLists.txt and /Users/paulzanna/Github/acp/Makefile
 
 ## Phase 2 — Foundational (blocking prerequisites)
 
@@ -29,8 +30,11 @@ This tasks file is organized by phases and user stories. Tasks are immediately e
 - [ ] T016 Implement HMAC-SHA256 (portable) in /Users/paulzanna/Github/acp/acp_crypto.c
 - [ ] T017 Implement session state and replay tracking in /Users/paulzanna/Github/acp/acp_session.c
 - [ ] T018 Implement default file-based keystore in /Users/paulzanna/Github/acp/acp_nvs.c
-- [ ] T019 Provide POSIX platform shim implementation in /Users/paulzanna/Github/acp/acp_platform_posix.c
 - [ ] T020 [P] Provide Windows (MinGW) shim fallback in /Users/paulzanna/Github/acp/acp_platform_windows.c
+- [ ] T062 [Core] Add wire header struct with explicit packing and static asserts in /Users/paulzanna/Github/acp/acp_protocol.h
+- [ ] T063 [Core] Implement host↔network helpers (u16/u32) and use them consistently in /Users/paulzanna/Github/acp/acp.c
+- [ ] T064 [Tests] Add byte-order conformance test (known header→wire bytes) in /Users/paulzanna/Github/acp/tests/byte_order_test.c
+- [ ] T065 [Core] Ensure version field is present and encoded in wire header in /Users/paulzanna/Github/acp/acp.c
 
 ## Phase 3 — User Story 1 (P1): Encode/Decode Telemetry Frame
 
@@ -51,6 +55,8 @@ Tasks:
 - [ ] T026 [US1] Add round-trip test in /Users/paulzanna/Github/acp/tests/frame_roundtrip_test.c
 - [ ] T027 [P] [US1] Add streaming multi-frame decode test in /Users/paulzanna/Github/acp/tests/stream_decode_test.c
 - [ ] T028 [P] [US1] Add COBS test vectors in /Users/paulzanna/Github/acp/tests/cobs_test.c
+- [ ] T060 [US1] Add CRC16-CCITT known vectors test in /Users/paulzanna/Github/acp/tests/crc16_test.c
+- [ ] T061 [US1] Document CRC16 polynomial/initial values and vector sources in /Users/paulzanna/Github/acp/docs/crc16.md
 
 ## Phase 4 — User Story 2 (P1): Authenticate Session With HMAC
 
@@ -71,6 +77,12 @@ Tasks:
 - [ ] T034 [US2] Add HMAC test vectors in /Users/paulzanna/Github/acp/tests/hmac_test.c
 - [ ] T035 [P] [US2] Add replay rejection tests in /Users/paulzanna/Github/acp/tests/replay_test.c
 - [ ] T036 [US2] Implement default keystore get_key() in /Users/paulzanna/Github/acp/acp_nvs.c
+- [ ] T051 [US2] Enforce command-frame auth in decoder: reject unauthenticated command frames in /Users/paulzanna/Github/acp/acp.c
+- [ ] T052 [US2] Add test: unauthenticated command frame is rejected in /Users/paulzanna/Github/acp/tests/command_auth_reject_test.c
+- [ ] T053 [US2] Add test: incorrect HMAC tag (16-byte truncated) is rejected in /Users/paulzanna/Github/acp/tests/command_auth_bad_tag_test.c
+- [ ] T054 [US2] Define HMAC truncation length constant (ACP_HMAC_TAG_LEN=16) in /Users/paulzanna/Github/acp/acp_protocol.h
+- [ ] T055 [US2] Update encoder/decoder to use ACP_HMAC_TAG_LEN for tag length in /Users/paulzanna/Github/acp/acp.c
+- [ ] T056 [US2] Add test vectors including 16-byte truncated tags in /Users/paulzanna/Github/acp/tests/hmac_test.c
 
 ## Phase 5 — User Story 3 (P2): Cross-Platform Build and Link
 
@@ -98,7 +110,7 @@ Independent Test Criteria:
 
 Tasks:
 
-- [ ] T042 [US4] Implement logging/time/mutex functions in /Users/paulzanna/Github/acp/acp_platform_posix.c
+- [ ] T042 [US4] Implement logging/time/mutex/keystore functions in /Users/paulzanna/Github/acp/acp_platform_posix.c
 - [ ] T043 [P] [US4] Implement Windows shim fallbacks in /Users/paulzanna/Github/acp/acp_platform_windows.c
 - [ ] T044 [US4] Provide stub shim implementation in /Users/paulzanna/Github/acp/tests/stubs/acp_platform_stubs.c
 - [ ] T045 [P] [US4] Add build variant to use stubs in /Users/paulzanna/Github/acp/tests/CMakeLists.txt
@@ -110,6 +122,9 @@ Tasks:
 - [ ] T048 [P] Add payload boundary tests (1024 bytes) in /Users/paulzanna/Github/acp/tests/payload_boundary_test.c
 - [ ] T049 [P] Add CRC mismatch tests in /Users/paulzanna/Github/acp/tests/crc_mismatch_test.c
 - [ ] T050 Update docs with protocol versioning and framing details in /Users/paulzanna/Github/acp/docs/acp_comm_spec_v0-3.md
+- [ ] T058 [Tests] Add no-heap verification (link wrap or symbol scan) in /Users/paulzanna/Github/acp/tests/no_heap_check.c
+- [ ] T059 [Docs] Document no-heap default and enabling heap features in /Users/paulzanna/Github/acp/README.md
+- [ ] T066 [Docs] Document keystore file format and manual key rotation steps in /Users/paulzanna/Github/acp/docs/keystore.md
 
 ## Dependencies (story completion order)
 

@@ -44,6 +44,8 @@ Applications can initialize an ACP session, derive or load a symmetric key from 
 
 1. Given a session with key K and sequence S, When a frame is signed, Then receiver verifies HMAC tag and accepts the frame.
 2. Given a previously accepted frame (same S), When it is replayed, Then receiver rejects it as a replay.
+3. Given a command frame without an HMAC tag, When it is processed, Then the receiver rejects it as unauthenticated.
+4. Given a command frame with an incorrect (16-byte truncated) HMAC-SHA256 tag, When it is processed, Then the receiver rejects it.
 
 ---
 
@@ -82,6 +84,7 @@ Applications can use default logging, time, mutex, and keystore shims on support
 - Replay attempts: duplicate sequence or stale nonce is rejected; counter wrap behavior is defined.
 - Endianness: multi-byte fields are encoded in network byte order; decoders handle both little/big endian hosts.
 - Keystore unavailable: authentication gracefully degrades to unauthenticated mode only if explicitly configured; default is to fail closed.
+- Authentication policy: Telemetry frames MAY be unauthenticated if explicitly configured (authentication is RECOMMENDED). Command frames MUST be authenticated; unauthenticated or incorrectly authenticated command frames are rejected.
 
 ## Requirements (mandatory)
 
@@ -89,7 +92,8 @@ Applications can use default logging, time, mutex, and keystore shims on support
 
 - FR-001: Provide a stable, portable C99 API for ACP core framing and encode/decode in `acp_protocol.h` with implementation in `acp.c`.
 - FR-002: Implement COBS framing and CRC16 integrity in `acp_framer.c` with streaming-safe encode/decode APIs.
-- FR-003: Implement frame authentication using HMAC-SHA256 in `acp_crypto.c` with constant-time verification.
+- FR-003: Implement frame authentication using HMAC-SHA256 truncated to 16 bytes (128 bits) in `acp_crypto.c` with constant-time verification.
+- FR-003a: Command frames MUST include a valid 16-byte truncated HMAC-SHA256 tag and MUST be subject to replay protection; unauthenticated or replayed command frames MUST be rejected.
 - FR-004: Implement session management and replay protection in `acp_session.c` using nonces and monotonic sequence numbers.
 - FR-005: Provide platform abstraction headers and default backends: logging (`acp_platform_log.h`), time (`acp_platform_time.h`), mutexes (`acp_platform_mutex.h`), and persistent keystore (`acp_platform_keystore.h`).
 - FR-006: Supply default POSIX backends for Linux/macOS and Windows backends or fallbacks as part of the distribution.
@@ -102,12 +106,12 @@ Applications can use default logging, time, mutex, and keystore shims on support
 - FR-013: Use packed structs and explicit, endian-safe field definitions; wire format is network byte order; add protocol version tags to frames.
 - FR-014: Default build avoids dynamic memory allocation; if optional allocation is supported, it must be explicitly opt-in at compile time and fully stub-safe.
 - FR-015: Windows toolchain support targets MinGW for official support in this release; MSVC support may be added in a subsequent release.
-- FR-016: Keystore: default file-based keystore in the user configuration directory; manual key rotation documented for integrators (no automatic rotation in core).
+- FR-016: Keystore: default file-based keystore in the user configuration directory; manual key rotation documented for integrators (no automatic rotation in core). The default keystore backend is provided in `acp_nvs.c` (default file-based keystore).
 - FR-017: Payload size limit: maximum payload size is 1024 bytes. Frames exceeding this limit MUST be rejected with an explicit error; segmentation, if needed, is the responsibility of calling applications.
 
 ### Key Entities (data-oriented)
 
-- ACP Frame: version, type, flags, length, payload bytes, CRC16, optional HMAC tag.
+- ACP Frame: version, type, flags, length, payload bytes, CRC16, optional HMAC tag (16-byte truncated; mandatory for command frames).
 - Session: key identifier, symmetric key material, nonce/sequence, last-accepted sequence, policy flags.
 - Keystore: persistent storage interface to retrieve key by ID; provides read-only API to core; platform-specific implementations.
 - Platform Shims: logging/time/mutex/keystore interfaces with default and override behaviors.
@@ -122,6 +126,7 @@ Applications can use default logging, time, mutex, and keystore shims on support
 - SC-004: Public API headers contain Doxygen comments for 100% of public functions, types, and macros.
 - SC-005: Default builds use no dynamic memory allocation in core paths; optional allocation features, if enabled, are documented and tested.
 - SC-006: README contains protocol overview, cross-platform build instructions, example snippets, and versioning notes sufficient for a new developer to integrate in under 30 minutes as validated by a setup walkthrough.
+- SC-007: Command frames without a 16-byte HMAC tag or with an incorrect tag are rejected in unit tests; telemetry unauthenticated frames are accepted only when explicitly configured.
 
 ## Assumptions and Dependencies
 
