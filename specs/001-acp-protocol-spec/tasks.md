@@ -8,25 +8,25 @@ This tasks file is organized by phases and user stories. Tasks are immediately e
 
 ## Phase 1 — Setup (project initialization)
 
-- [ ] T001 Create Makefile in /Users/paulzanna/Github/acp/Makefile
-- [ ] T002 Create CMakeLists.txt with targets libacp (static/shared) in /Users/paulzanna/Github/acp/CMakeLists.txt
-- [ ] T003 Create GitHub Actions CI workflow for Linux/macOS/Windows (MinGW) in /Users/paulzanna/Github/acp/.github/workflows/build.yml
-- [ ] T004 Create Doxygen config in /Users/paulzanna/Github/acp/docs/Doxyfile
-- [ ] T005 Create examples skeleton in /Users/paulzanna/Github/acp/examples/acp_client.c
-- [ ] T006 Create examples skeleton in /Users/paulzanna/Github/acp/examples/mock_serial.c
-- [ ] T007 Create tests build config (CMakeLists or Makefile) in /Users/paulzanna/Github/acp/tests/CMakeLists.txt
-- [ ] T008 [P] Add README build matrix section in /Users/paulzanna/Github/acp/README.md
-- [ ] T057 [Build] Add compile flag ACP_NO_HEAP (default ON) to fail builds on heap usage in /Users/paulzanna/Github/acp/CMakeLists.txt and /Users/paulzanna/Github/acp/Makefile
+- [X] T001 Create Makefile in /Users/paulzanna/Github/acp/Makefile
+- [X] T002 Create CMakeLists.txt with targets libacp (static/shared) in /Users/paulzanna/Github/acp/CMakeLists.txt
+- [X] T003 Create GitHub Actions CI workflow for Linux/macOS/Windows (MinGW) in /Users/paulzanna/Github/acp/.github/workflows/build.yml
+- [X] T004 Create Doxygen config in /Users/paulzanna/Github/acp/docs/Doxyfile
+- [X] T005 Create examples skeleton in /Users/paulzanna/Github/acp/examples/acp_client.c
+- [X] T006 Create examples skeleton in /Users/paulzanna/Github/acp/examples/mock_serial.c
+- [X] T007 Create tests build config (CMakeLists or Makefile) in /Users/paulzanna/Github/acp/tests/CMakeLists.txt
+- [X] T008 [P] Add README build matrix section in /Users/paulzanna/Github/acp/README.md
+- [X] T057 [Build] Add compile flag ACP_NO_HEAP (default ON) to fail builds on heap usage in /Users/paulzanna/Github/acp/CMakeLists.txt and /Users/paulzanna/Github/acp/Makefile
 
 ## Phase 2 — Foundational (blocking prerequisites)
 
-- [ ] T009 Define public API header in /Users/paulzanna/Github/acp/acp_protocol.h
-- [ ] T010 Implement core API stub (wiring only) in /Users/paulzanna/Github/acp/acp.c
-- [ ] T011 Create version header (semver) in /Users/paulzanna/Github/acp/acp_version.h
-- [ ] T012 Define error codes in /Users/paulzanna/Github/acp/acp_errors.h
-- [ ] T013 Implement CRC16-CCITT in /Users/paulzanna/Github/acp/acp_crc16.c
-- [ ] T014 [P] Add CRC16 header in /Users/paulzanna/Github/acp/acp_crc16.h
-- [ ] T015 Implement COBS encode/decode scaffolding in /Users/paulzanna/Github/acp/acp_framer.c
+- [X] T009 Define public API header in /Users/paulzanna/Github/acp/acp_protocol.h
+- [X] T010 Implement core API stub (wiring only) in /Users/paulzanna/Github/acp/acp.c
+- [X] T011 Create version header (semver) in /Users/paulzanna/Github/acp/acp_version.h
+- [X] T012 Define error codes in /Users/paulzanna/Github/acp/acp_errors.h
+- [X] T013 Implement CRC16-CCITT in /Users/paulzanna/Github/acp/acp_crc16.c
+- [X] T014 [P] Add CRC16 header in /Users/paulzanna/Github/acp/acp_crc16.h
+- [X] T015 Implement COBS encode/decode scaffolding in /Users/paulzanna/Github/acp/acp_framer.c
 - [ ] T016 Implement HMAC-SHA256 (portable) in /Users/paulzanna/Github/acp/acp_crypto.c
 - [ ] T017 Implement session state and replay tracking in /Users/paulzanna/Github/acp/acp_session.c
 - [ ] T018 Implement default file-based keystore in /Users/paulzanna/Github/acp/acp_nvs.c

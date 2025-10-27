@@ -54,3 +54,26 @@ dkms.conf
 # debug information files
 *.dwo
 .DS_Store
+
+# Build directories
+build/
+bin/
+obj/
+out/
+
+# IDE and editor files
+.vscode/
+.idea/
+*.log
+.env*
+
+# C-specific build artifacts
+Makefile.in
+config.log
+config.status
+autom4te.cache/
+
+# Test coverage and temporary files
+*.tmp
+*.swp
+coverage/

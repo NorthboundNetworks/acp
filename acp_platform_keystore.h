@@ -78,6 +78,26 @@ extern "C"
      */
     int acp_platform_keystore_erase(const char *keyspace, const char *key_name);
 
+    /**
+     * @brief Get key by ID from keystore (simplified interface)
+     *
+     * @param key_id     Key identifier
+     * @param key_out    Output buffer for key data
+     * @param key_len    Input: buffer size, Output: actual key length
+     * @return int       0 on success, non-zero on error
+     */
+    int acp_platform_keystore_get_key(uint32_t key_id, uint8_t *key_out, size_t *key_len);
+
+    /**
+     * @brief Store key by ID in keystore (simplified interface)
+     *
+     * @param key_id     Key identifier
+     * @param key        Key data to store
+     * @param key_len    Length of key data
+     * @return int       0 on success, non-zero on error
+     */
+    int acp_platform_keystore_store_key(uint32_t key_id, const uint8_t *key, size_t key_len);
+
 #ifdef __cplusplus
 }
 #endif

@@ -1,1125 +1,378 @@
-/**/**/**
-
+/**
  * @file acp_crypto.c
-
- * @brief ACP Cryptographic Functions - Portable HMAC-SHA256 Implementation * @file acp_crypto.c * @file acp_crypto.c
-
+ * @brief ACP Cryptographic Functions - Portable HMAC-SHA256 Implementation
  * @version 0.3.0
-
- * @date 2025-10-27 * @brief ACP Cryptographic Functions - Portable HMAC-SHA256 Implementation * @brief ACP Cryptographic Functions - Portable HMAC-SHA256 Implementation
-
+ * @date 2025-10-27
  * 
-
- * This module provides portable HMAC-SHA256 authentication without external * @version 0.3.0 * @version 0.3.0
-
+ * This module provides portable HMAC-SHA256 authentication without external
  * dependencies, implementing RFC 2104 (HMAC) and FIPS 180-4 (SHA-256).
-
- */ * @date 2025-10-27 * @date 2025-10-27
-
-
-
-#include "acp_crypto.h" *  * 
-
-#include <string.h>
-
- * This module provides portable HMAC-SHA256 authentication without external * This module provides portable HMAC-SHA256 authentication without external
-
-/* ========================================================================== */
-
-/*                          SHA-256 Constants                                */ * dependencies, implementing RFC 2104 (HMAC) and FIPS 180-4 (SHA-256). * dependencies, implementing RFC 2104 (HMAC) and FIPS 180-4 (SHA-256).
-
-/* ========================================================================== */
-
- */ */
-
-/** @brief SHA-256 constants (first 32 bits of the fractional parts of the cube roots of the first 64 primes) */
-
-static const uint32_t K[64] = {
-
-    0x428a2f98, 0x71374491, 0xb5c0fbcf, 0xe9b5dba5, 0x3956c25b, 0x59f111f1, 0x923f82a4, 0xab1c5ed5,
-
-    0xd807aa98, 0x12835b01, 0x243185be, 0x550c7dc3, 0x72be5d74, 0x80deb1fe, 0x9bdc06a7, 0xc19bf174,#include "acp_crypto.h"#include "acp_crypto.h"
-
-    0xe49b69c1, 0xefbe4786, 0x0fc19dc6, 0x240ca1cc, 0x2de92c6f, 0x4a7484aa, 0x5cb0a9dc, 0x76f988da,
-
-    0x983e5152, 0xa831c66d, 0xb00327c8, 0xbf597fc7, 0xc6e00bf3, 0xd5a79147, 0x06ca6351, 0x14292967,#include <string.h>#include <string.h>
-
-    0x27b70a85, 0x2e1b2138, 0x4d2c6dfc, 0x53380d13, 0x650a7354, 0x766a0abb, 0x81c2c92e, 0x92722c85,
-
-    0xa2bfe8a1, 0xa81a664b, 0xc24b8b70, 0xc76c51a3, 0xd192e819, 0xd6990624, 0xf40e3585, 0x106aa070,
-
-    0x19a4c116, 0x1e376c08, 0x2748774c, 0x34b0bcb5, 0x391c0cb3, 0x4ed8aa4a, 0x5b9cca4f, 0x682e6ff3,
-
-    0x748f82ee, 0x78a5636f, 0x84c87814, 0x8cc70208, 0x90befffa, 0xa4506ceb, 0xbef9a3f7, 0xc67178f2/* ========================================================================== */*@version 0.3.0
-
-};
-
-/*                          SHA-256 Constants                                */
-
-/** @brief SHA-256 initial hash values (first 32 bits of the fractional parts of the square roots of the first 8 primes) */
-
-static const uint32_t H0[8] = {/* ========================================================================== */    void
-
-    0x6a09e667, 0xbb67ae85, 0x3c6ef372, 0xa54ff53a,
-
-    0x510e527f, 0x9b05688c, 0x1f83d9ab, 0x5be0cd19    acp_sha256_update(acp_sha256_ctx_t *ctx, const uint8_t *data, size_t len)
-
-};
-
-/** @brief SHA-256 constants (first 32 bits of the fractional parts of the cube roots of the first 64 primes) */{
-
-/* ========================================================================== */
-
-/*                            Helper Macros                                  */static const uint32_t K[64] = {
-
-/* ========================================================================== */
-
-    0x428a2f98, 0x71374491, 0xb5c0fbcf, 0xe9b5dba5, 0x3956c25b, 0x59f111f1, 0x923f82a4, 0xab1c5ed5,    (void)ctx; * @date 2025-10-27 * Provides portable SHA-256 and HMAC-SHA256 implementations for ACP protocol. * This module provides portable HMAC-SHA256 authentication without external
-
-/** @brief Right rotate 32-bit value */
-
-#define ROTR(x, n) (((x) >> (n)) | ((x) << (32 - (n))))    0xd807aa98, 0x12835b01, 0x243185be, 0x550c7dc3, 0x72be5d74, 0x80deb1fe, 0x9bdc06a7, 0xc19bf174,
-
-
-
-/** @brief SHA-256 Ch function */    0xe49b69c1, 0xefbe4786, 0x0fc19dc6, 0x240ca1cc, 0x2de92c6f, 0x4a7484aa, 0x5cb0a9dc, 0x76f988da,    (void)data;
-
-#define CH(x, y, z) (((x) & (y)) ^ (~(x) & (z)))
-
-    0x983e5152, 0xa831c66d, 0xb00327c8, 0xbf597fc7, 0xc6e00bf3, 0xd5a79147, 0x06ca6351, 0x14292967,
-
-/** @brief SHA-256 Maj function */
-
-#define MAJ(x, y, z) (((x) & (y)) ^ ((x) & (z)) ^ ((y) & (z)))    0x27b70a85, 0x2e1b2138, 0x4d2c6dfc, 0x53380d13, 0x650a7354, 0x766a0abb, 0x81c2c92e, 0x92722c85,    (void)len;
-
-
-
-/** @brief SHA-256 Sigma0 function */    0xa2bfe8a1, 0xa81a664b, 0xc24b8b70, 0xc76c51a3, 0xd192e819, 0xd6990624, 0xf40e3585, 0x106aa070,    */
-
-#define EP0(x) (ROTR(x, 2) ^ ROTR(x, 13) ^ ROTR(x, 22))
-
-    0x19a4c116, 0x1e376c08, 0x2748774c, 0x34b0bcb5, 0x391c0cb3, 0x4ed8aa4a, 0x5b9cca4f, 0x682e6ff3,}
-
-/** @brief SHA-256 Sigma1 function */
-
-#define EP1(x) (ROTR(x, 6) ^ ROTR(x, 11) ^ ROTR(x, 25))    0x748f82ee, 0x78a5636f, 0x84c87814, 0x8cc70208, 0x90befffa, 0xa4506ceb, 0xbef9a3f7, 0xc67178f2
-
-
-
-/** @brief SHA-256 sigma0 function */};*All functions are implemented in pure C99 without external dependencies.*dependencies, implementing RFC 2104(HMAC)and FIPS 180 - 4(SHA - 256).
-
-#define SIG0(x) (ROTR(x, 7) ^ ROTR(x, 18) ^ ((x) >> 3))
-
-
-
-/** @brief SHA-256 sigma1 function */  
-
-#define SIG1(x) (ROTR(x, 17) ^ ROTR(x, 19) ^ ((x) >> 10))/** @brief SHA-256 initial hash values (first 32 bits of the fractional parts of the square roots of the first 8 primes) */                                                                                                                                  void acp_sha256_final(acp_sha256_ctx_t *ctx, uint8_t *hash)
-
-
-
-/* ========================================================================== */static const uint32_t H0[8] = {{
-
-/*                          SHA-256 Implementation                           */
-
-/* ========================================================================== */    0x6a09e667, 0xbb67ae85, 0x3c6ef372, 0xa54ff53a,
-
-
-
-/**    0x510e527f, 0x9b05688c, 0x1f83d9ab, 0x5be0cd19    (void)ctx;
-
- * @brief Process a single 512-bit block through SHA-256 compression function
-
- */};#include "acp_crypto.h"
-
-static void sha256_transform(uint32_t *state, const uint8_t *block)
-
-{
-
-    uint32_t w[64];
-
-    uint32_t a, b, c, d, e, f, g, h;/* ========================================================================== */        if (hash)
-
-    uint32_t t1, t2;
-
-    int i;/*                            Helper Macros                                  */    {
-
-
-
-    /* Copy chunk into first 16 words of message schedule array *//* ========================================================================== */
-
-    for (i = 0; i < 16; i++) {
-
-        w[i] = ((uint32_t)block[i*4] << 24) |        memset(hash, 0, ACP_SHA256_SIZE);
-
-               ((uint32_t)block[i*4 + 1] << 16) |
-
-               ((uint32_t)block[i*4 + 2] << 8) |/** @brief Right rotate 32-bit value */#include <string.h> * *
-
-               ((uint32_t)block[i*4 + 3]);
-
-    }#define ROTR(x, n)                                      \    }
-
-
-
-    /* Extend the first 16 words into the remaining 48 words */    (((x) >> (n)) | ((x) << (32 - (n))))}
-
-    for (i = 16; i < 64; i++) {
-
-        w[i] = SIG1(w[i-2]) + w[i-7] + SIG0(w[i-15]) + w[i-16];
-
-    }
-
-/** @brief SHA-256 Ch function */void acp_sha256(const uint8_t *data, size_t len, uint8_t *hash)
-
-    /* Initialize working variables */
-
-    a = state[0];#define CH(x, y, z) (((x) & (y)) ^ (~(x) & (z))){ /* ========================================================================== */
-
-    b = state[1]; 
-
-    c = state[2];    *@version 0.3.0 * @version 0.3.0
-
-    d = state[3];
-
-    e = state[4];/** @brief SHA-256 Maj function */
-
-    f = state[5];
-
-    g = state[6];#define MAJ(x, y, z) (((x) & (y)) ^ ((x) & (z)) ^ ((y) & (z)))        (void)data;
-
-    h = state[7];
-
-
-
-    /* Main loop */
-
-    for (i = 0; i < 64; i++) {/** @brief SHA-256 Sigma0 function */    (void)len; /*                          SHA-256 Constants                                */
-
-        t1 = h + EP1(e) + CH(e, f, g) + K[i] + w[i];
-
-        t2 = EP0(a) + MAJ(a, b, c);#define EP0(x) (ROTR(x, 2) ^ ROTR(x, 13) ^ ROTR(x, 22))
-
-        h = g;
-
-        g = f;    if (hash)
-
-        f = e;
-
-        e = d + t1;/** @brief SHA-256 Sigma1 function */    {
-
-        d = c;
-
-        c = b;#define EP1(x) (ROTR(x, 6) ^ ROTR(x, 11) ^ ROTR(x, 25))
-
-        b = a;
-
-        a = t1 + t2;        memset(hash, 0, ACP_SHA256_SIZE); /* ========================================================================== */
-
-    }
-
-/** @brief SHA-256 sigma0 function */        *@date 2025 - 10 - 27 * @date 2025 - 10 - 27
-
-    /* Add compressed chunk to hash value */
-
-    state[0] += a;#define SIG0(x) (ROTR(x, 7) ^ ROTR(x, 18) ^ ((x) >> 3))    }
-
-    state[1] += b;
-
-    state[2] += c;}
-
-    state[3] += d;
-
-    state[4] += e;/** @brief SHA-256 sigma1 function */  
-
-    state[5] += f;
-
-    state[6] += g;#define SIG1(x) (ROTR(x, 17) ^ ROTR(x, 19) ^ ((x) >> 10))void acp_hmac_init(acp_hmac_ctx_t *ctx, const uint8_t *key, size_t key_len)
-
-    state[7] += h;
-
-}{ /** SHA-256 round constants */
-
-
-
-void acp_sha256_init(acp_sha256_ctx_t *ctx)/* ========================================================================== */    */ */
-
-{
-
-    if (!ctx) return;/*                          SHA-256 Implementation                           */
-
-
-
-    memcpy(ctx->state, H0, sizeof(H0));/* ========================================================================== */        (void)ctx;
-
-    ctx->bit_len = 0;
-
-    ctx->buffer_len = 0;
-
-}
-
-/**    (void)key;
-
-void acp_sha256_update(acp_sha256_ctx_t *ctx, const uint8_t *data, size_t len)
-
-{ * @brief Process a single 512-bit block through SHA-256 compression function    static const uint32_t K[64] = {
-
-    if (!ctx || !data) return;
-
  */
 
-    size_t i;
+#include "acp_crypto.h"
+#include <string.h>
 
-static void sha256_transform(uint32_t *state, const uint8_t *block)        (void)key_len;
+*@version 0.3.0
 
-    for (i = 0; i < len; i++) {
+    void
+    acp_sha256_update(acp_sha256_ctx_t *ctx, const uint8_t *data, size_t len)
+{
 
-        ctx->buffer[ctx->buffer_len] = data[i];{}
+    (void)ctx; * @date 2025-10-27 * Provides portable SHA-256 and HMAC-SHA256 implementations for ACP protocol. * This module provides portable HMAC-SHA256 authentication without external
 
-        ctx->buffer_len++;
+    (void)data;
 
-    uint32_t w[64];0x428a2f98, 0x71374491, 0xb5c0fbcf, 0xe9b5dba5, 0x3956c25b, 0x59f111f1, 0x923f82a4, 0xab1c5ed5,
-
-        if (ctx->buffer_len == 64) {
-
-            sha256_transform(ctx->state, ctx->buffer);    uint32_t a, b, c, d, e, f, g, h;
-
-            ctx->bit_len += 512;
-
-            ctx->buffer_len = 0;    uint32_t t1, t2;    void acp_hmac_update(acp_hmac_ctx_t *ctx, const uint8_t *data, size_t len)
-
-        }
-
-    }    int i;{
-
+    (void)len;
+    */
 }
 
+*All functions are implemented in pure C99 without external dependencies.*dependencies, implementing RFC 2104(HMAC)and FIPS 180 - 4(SHA - 256).
+
+                                                                                                                                  void acp_sha256_final(acp_sha256_ctx_t *ctx, uint8_t *hash)
+{
+
+    (void)ctx;
+#include "acp_crypto.h"
+
+        if (hash)
+    {
+
+        memset(hash, 0, ACP_SHA256_SIZE);
+#include <string.h> * *
+    }
+}
+
+void acp_sha256(const uint8_t *data, size_t len, uint8_t *hash)
+{ /* ========================================================================== */
+    *@version 0.3.0 * @version 0.3.0
+
+        (void)data;
+
+    (void)len; /*                          SHA-256 Constants                                */
+
+    if (hash)
+    {
+
+        memset(hash, 0, ACP_SHA256_SIZE); /* ========================================================================== */
+        *@date 2025 - 10 - 27 * @date 2025 - 10 - 27
+    }
+}
+
+void acp_hmac_init(acp_hmac_ctx_t *ctx, const uint8_t *key, size_t key_len)
+{ /** SHA-256 round constants */
+    */ */
+
+        (void)ctx;
+
+    (void)key;
+    static const uint32_t K[64] = {
+
+        (void)key_len;
+}
+0x428a2f98, 0x71374491, 0xb5c0fbcf, 0xe9b5dba5, 0x3956c25b, 0x59f111f1, 0x923f82a4, 0xab1c5ed5,
+
+    void acp_hmac_update(acp_hmac_ctx_t *ctx, const uint8_t *data, size_t len)
+{
     0xd807aa98, 0x12835b01, 0x243185be, 0x550c7dc3, 0x72be5d74, 0x80deb1fe, 0x9bdc06a7, 0xc19bf174,
 
-void acp_sha256_final(acp_sha256_ctx_t *ctx, uint8_t *hash)
+        (void)ctx;
 
-{    /* Copy chunk into first 16 words of message schedule array */
+    (void)data;
+    0xe49b69c1, 0xefbe4786, 0x0fc19dc6, 0x240ca1cc, 0x2de92c6f, 0x4a7484aa, 0x5cb0a9dc, 0x76f988da, #include "acp_crypto.h" #include "acp_protocol.h"
 
-    if (!ctx || !hash) return;
+        (void)len;
+}
+0x983e5152, 0xa831c66d, 0xb00327c8, 0xbf597fc7, 0xc6e00bf3, 0xd5a79147, 0x06ca6351, 0x14292967,
 
-    for (i = 0; i < 16; i++) {        (void)ctx;
+    void acp_hmac_final(acp_hmac_ctx_t *ctx, uint8_t *mac, int truncated)
+{
+    0x27b70a85, 0x2e1b2138, 0x4d2c6dfc, 0x53380d13, 0x650a7354, 0x766a0abb, 0x81c2c92e, 0x92722c85, #include<string.h> #include "acp_errors.h"
 
-    size_t i = ctx->buffer_len;
+        (void)ctx;
 
-        w[i] = ((uint32_t)block[i*4] << 24) |
+    (void)truncated;
+    0xa2bfe8a1, 0xa81a664b, 0xc24b8b70, 0xc76c51a3, 0xd192e819, 0xd6990624, 0xf40e3585, 0x106aa070,
 
-    /* Pad whatever data is left in the buffer */
+        if (mac)
+    {
 
-    if (ctx->buffer_len < 56) {               ((uint32_t)block[i*4 + 1] << 16) |    (void)data;
-
-        ctx->buffer[i++] = 0x80;
-
-        while (i < 56) {               ((uint32_t)block[i*4 + 2] << 8) |    0xe49b69c1, 0xefbe4786, 0x0fc19dc6, 0x240ca1cc, 0x2de92c6f, 0x4a7484aa, 0x5cb0a9dc, 0x76f988da, #include "acp_crypto.h" #include "acp_protocol.h"
-
-            ctx->buffer[i++] = 0x00;
-
-        }               ((uint32_t)block[i*4 + 3]);
-
-    } else {
-
-        ctx->buffer[i++] = 0x80;    }        (void)len;
-
-        while (i < 64) {
-
-            ctx->buffer[i++] = 0x00;}
-
-        }
-
-        sha256_transform(ctx->state, ctx->buffer);    /* Extend the first 16 words into the remaining 48 words */0x983e5152, 0xa831c66d, 0xb00327c8, 0xbf597fc7, 0xc6e00bf3, 0xd5a79147, 0x06ca6351, 0x14292967,
-
-        memset(ctx->buffer, 0, 56);
-
-    }    for (i = 16; i < 64; i++) {
-
-
-
-    /* Append original length in bits */        w[i] = SIG1(w[i-2]) + w[i-7] + SIG0(w[i-15]) + w[i-16];    void acp_hmac_final(acp_hmac_ctx_t *ctx, uint8_t *mac, int truncated)
-
-    ctx->bit_len += ctx->buffer_len * 8;
-
-    ctx->buffer[63] = (uint8_t)(ctx->bit_len);    }{
-
-    ctx->buffer[62] = (uint8_t)(ctx->bit_len >> 8);
-
-    ctx->buffer[61] = (uint8_t)(ctx->bit_len >> 16);    0x27b70a85, 0x2e1b2138, 0x4d2c6dfc, 0x53380d13, 0x650a7354, 0x766a0abb, 0x81c2c92e, 0x92722c85, #include<string.h> #include "acp_errors.h"
-
-    ctx->buffer[60] = (uint8_t)(ctx->bit_len >> 24);
-
-    ctx->buffer[59] = (uint8_t)(ctx->bit_len >> 32);    /* Initialize working variables */
-
-    ctx->buffer[58] = (uint8_t)(ctx->bit_len >> 40);
-
-    ctx->buffer[57] = (uint8_t)(ctx->bit_len >> 48);    a = state[0];        (void)ctx;
-
-    ctx->buffer[56] = (uint8_t)(ctx->bit_len >> 56);
-
-    b = state[1]; 
-
-    sha256_transform(ctx->state, ctx->buffer);
-
-    c = state[2];    (void)truncated;
-
-    /* Produce the final hash value (big-endian) */
-
-    for (i = 0; i < 4; i++) {    d = state[3];    0xa2bfe8a1, 0xa81a664b, 0xc24b8b70, 0xc76c51a3, 0xd192e819, 0xd6990624, 0xf40e3585, 0x106aa070,
-
-        hash[i]      = (uint8_t)(ctx->state[0] >> (24 - i * 8));
-
-        hash[i + 4]  = (uint8_t)(ctx->state[1] >> (24 - i * 8));    e = state[4];
-
-        hash[i + 8]  = (uint8_t)(ctx->state[2] >> (24 - i * 8));
-
-        hash[i + 12] = (uint8_t)(ctx->state[3] >> (24 - i * 8));    f = state[5];        if (mac)
-
-        hash[i + 16] = (uint8_t)(ctx->state[4] >> (24 - i * 8));
-
-        hash[i + 20] = (uint8_t)(ctx->state[5] >> (24 - i * 8));    g = state[6];    {
-
-        hash[i + 24] = (uint8_t)(ctx->state[6] >> (24 - i * 8));
-
-        hash[i + 28] = (uint8_t)(ctx->state[7] >> (24 - i * 8));    h = state[7];
-
+        memset(mac, 0, ACP_HMAC_SIZE);
+        0x19a4c116, 0x1e376c08, 0x2748774c, 0x34b0bcb5, 0x391c0cb3, 0x4ed8aa4a, 0x5b9cca4f, 0x682e6ff3, #include<string.h>
     }
+}    0x748f82ee, 0x78a5636f, 0x84c87814, 0x8cc70208, 0x90befffa, 0xa4506ceb, 0xbef9a3f7, 0xc67178f2
 
-}        memset(mac, 0, ACP_HMAC_SIZE);
 
 
-
-void acp_sha256(const uint8_t *data, size_t len, uint8_t *hash)    /* Main loop */        0x19a4c116, 0x1e376c08, 0x2748774c, 0x34b0bcb5, 0x391c0cb3, 0x4ed8aa4a, 0x5b9cca4f, 0x682e6ff3, #include<string.h>
-
-{
-
-    acp_sha256_ctx_t ctx;    for (i = 0; i < 64; i++) {    }
-
-    acp_sha256_init(&ctx);
-
-    acp_sha256_update(&ctx, data, len);        t1 = h + EP1(e) + CH(e, f, g) + K[i] + w[i];}    0x748f82ee, 0x78a5636f, 0x84c87814, 0x8cc70208, 0x90befffa, 0xa4506ceb, 0xbef9a3f7, 0xc67178f2
-
-    acp_sha256_final(&ctx, hash);
-
-}        t2 = EP0(a) + MAJ(a, b, c);
-
-
-
-/* ========================================================================== */        h = g;
-
-/*                        HMAC-SHA256 Implementation                         */
-
-/* ========================================================================== */        g = f;
-
-
-
-void acp_hmac_init(acp_hmac_ctx_t *ctx, const uint8_t *key, size_t key_len)        f = e;void acp_hmac_sha256(const uint8_t *key, size_t key_len,
-
-{
-
-    if (!ctx || !key) return;        e = d + t1;}
-
-
-
-    uint8_t key_hash[ACP_SHA256_SIZE];        d = c;; /* ========================================================================== */
-
-    const uint8_t *real_key;
-
-    size_t real_key_len;        c = b;
-
-    size_t i;
-
-        b = a;                     const uint8_t *data, size_t data_len,
-
-    /* If key is longer than block size, hash it */
-
-    if (key_len > ACP_SHA256_BLOCK_SIZE) {        a = t1 + t2;
-
-        acp_sha256(key, key_len, key_hash);
-
-        real_key = key_hash;    }                     uint8_t *mac)
-
-        real_key_len = ACP_SHA256_SIZE;
-
-    } else {                     {
-
-        real_key = key;
-
-        real_key_len = key_len;    /* Add compressed chunk to hash value */
-
-    }
-
-    state[0] += a;                         (void)key;
-
-    /* Create padded key */
-
-    memset(ctx->key_pad, 0, ACP_SHA256_BLOCK_SIZE);    state[1] += b;
-
-    memcpy(ctx->key_pad, real_key, real_key_len);
-
-    state[2] += c;                         (void)key_len; /** SHA-256 initial hash values */ /*                          SHA-256 Constants                                */ /* ========================================================================== */
-
-    /* Create inner and outer padded keys */
-
-    uint8_t i_key_pad[ACP_SHA256_BLOCK_SIZE];    state[3] += d;
-
-    uint8_t o_key_pad[ACP_SHA256_BLOCK_SIZE];
-
-    state[4] += e;                         (void)data;
-
-    for (i = 0; i < ACP_SHA256_BLOCK_SIZE; i++) {
-
-        i_key_pad[i] = ctx->key_pad[i] ^ 0x36;    state[5] += f;
-
-        o_key_pad[i] = ctx->key_pad[i] ^ 0x5c;
-
-    }    state[6] += g;                         (void)data_len;
-
-
-
-    /* Start inner hash */    state[7] += h;                         static const uint32_t H0[8] = {
-
-    acp_sha256_init(&ctx->inner);
-
-    acp_sha256_update(&ctx->inner, i_key_pad, ACP_SHA256_BLOCK_SIZE);}
-
-
-
-    /* Start outer hash */                             if (mac){
-
-    acp_sha256_init(&ctx->outer);
-
-    acp_sha256_update(&ctx->outer, o_key_pad, ACP_SHA256_BLOCK_SIZE);void acp_sha256_init(acp_sha256_ctx_t *ctx)
-
-
-
-    /* Clear sensitive data */{                                 memset(mac, 0, ACP_HMAC_SIZE);
-
-    acp_crypto_clear(key_hash, sizeof(key_hash));
-
-    acp_crypto_clear(i_key_pad, sizeof(i_key_pad));    if (!ctx) return;                         0x6a09e667, 0xbb67ae85, 0x3c6ef372, 0xa54ff53a, /* ========================================================================== */ /*                            SHA-256 Constants                              */
-
-    acp_crypto_clear(o_key_pad, sizeof(o_key_pad));
-
-}                     }
-
-
-
-void acp_hmac_update(acp_hmac_ctx_t *ctx, const uint8_t *data, size_t len)    memcpy(ctx->state, H0, sizeof(H0));                     }
-
-{
-
-    if (!ctx || !data) return;    ctx->bit_len = 0;                     0x510e527f, 0x9b05688c, 0x1f83d9ab, 0x5be0cd19
-
-    acp_sha256_update(&ctx->inner, data, len);
-
-}    ctx->buffer_len = 0;
-
-
-
-void acp_hmac_final(acp_hmac_ctx_t *ctx, uint8_t *mac, int truncated)}                         int
-
-{
-
-    if (!ctx || !mac) return;                         acp_crypto_memcmp_ct(const void *a, const void *b, size_t len) {}; /* ========================================================================== */
-
-
-
-    uint8_t inner_hash[ACP_SHA256_SIZE];void acp_sha256_update(acp_sha256_ctx_t *ctx, const uint8_t *data, size_t len)
-
-
-
-    /* Complete inner hash */{                     return memcmp(a, b, len);
-
-    acp_sha256_final(&ctx->inner, inner_hash);
-
-    if (!ctx || !data) return;                     }
-
-    /* Complete outer hash */
-
-    acp_sha256_update(&ctx->outer, inner_hash, ACP_SHA256_SIZE);
-
-    acp_sha256_final(&ctx->outer, inner_hash);
-
-    size_t i;                     int acp_hmac_verify(const uint8_t *expected, const uint8_t *received, size_t len)
-
-    /* Copy result */
-
-    if (truncated) {                     { /* ========================================================================== */ /** @brief SHA-256 round constants (first 32 bits of fractional parts of cube roots of first 64 primes) */
-
-        memcpy(mac, inner_hash, ACP_HMAC_SIZE); /* 16 bytes for ACP */
-
-    } else {    for (i = 0; i < len; i++) {
-
-        memcpy(mac, inner_hash, ACP_HMAC_FULL_SIZE); /* 32 bytes full */
-
-    }        ctx->buffer[ctx->buffer_len] = data[i];                         return memcmp(expected, received, len);
-
-
-
-    /* Clear sensitive data */        ctx->buffer_len++;
-
-    acp_crypto_clear(inner_hash, sizeof(inner_hash));
-
-}                     } /*                            Helper Macros                                  */
-
-
-
-void acp_hmac_sha256(const uint8_t *key, size_t key_len,        if (ctx->buffer_len == 64) {
+void acp_hmac_sha256(const uint8_t *key, size_t key_len,
+}
+; /* ========================================================================== */
 
                      const uint8_t *data, size_t data_len,
 
-                     uint8_t *mac)            sha256_transform(ctx->state, ctx->buffer);                     void acp_crypto_clear(void *data, size_t len)
+                     uint8_t *mac)
+                     {
 
-{
+                         (void)key;
 
-    acp_hmac_ctx_t ctx;            ctx->bit_len += 512;                     {                                   /* ========================================================================== */
+                         (void)key_len; /** SHA-256 initial hash values */ /*                          SHA-256 Constants                                */ /* ========================================================================== */
 
-    acp_hmac_init(&ctx, key, key_len);
+                         (void)data;
 
-    acp_hmac_update(&ctx, data, data_len);            ctx->buffer_len = 0;                         static const uint32_t K[64] = { /** @brief SHA-256 constants (first 32 bits of the fractional parts of the cube roots of the first 64 primes) */
+                         (void)data_len;
+                         static const uint32_t H0[8] = {
 
-    acp_hmac_final(&ctx, mac, 1); /* Truncated for ACP */
+                             if (mac){
 
-    acp_crypto_clear(&ctx, sizeof(ctx));        }
+                                 memset(mac, 0, ACP_HMAC_SIZE);
+                         0x6a09e667, 0xbb67ae85, 0x3c6ef372, 0xa54ff53a, /* ========================================================================== */ /*                            SHA-256 Constants                              */
+                     }
+                     }
+                     0x510e527f, 0x9b05688c, 0x1f83d9ab, 0x5be0cd19
 
-}
+                         int
+                         acp_crypto_memcmp_ct(const void *a, const void *b, size_t len) {}; /* ========================================================================== */
 
-    }                                                         memset(data, 0, len);
+                     return memcmp(a, b, len);
+                     }
 
-/* ========================================================================== */
+                     int acp_hmac_verify(const uint8_t *expected, const uint8_t *received, size_t len)
+                     { /* ========================================================================== */ /** @brief SHA-256 round constants (first 32 bits of fractional parts of cube roots of first 64 primes) */
 
-/*                            Utility Functions                              */}                     }
+                         return memcmp(expected, received, len);
 
-/* ========================================================================== */
+                     } /*                            Helper Macros                                  */
 
+                     void acp_crypto_clear(void *data, size_t len)
+                     {                                   /* ========================================================================== */
+                         static const uint32_t K[64] = { /** @brief SHA-256 constants (first 32 bits of the fractional parts of the cube roots of the first 64 primes) */
 
+                                                         memset(data, 0, len);
+                     }
 
-int acp_crypto_memcmp_ct(const void *a, const void *b, size_t len)
+                     int acp_sha256_self_test(void)
+                     {
+#define ROTR(x, n)(((x) >> (n)) | ((x) << (32 - (n)))) 0x428a2f98, 0x71374491, 0xb5c0fbcf, 0xe9b5dba5, 0x3956c25b, 0x59f111f1, 0x923f82a4, 0xab1c5ed5, static const uint32_t sha256_k[64] = {
 
-{void acp_sha256_final(acp_sha256_ctx_t *ctx, uint8_t *hash)                     int acp_sha256_self_test(void)
+                             return 0; /* Pass for now */
+                     }
+#define CH(x, y, z)(((x) & (y)) ^ (~(x) & (z)))
 
-    const uint8_t *aa = (const uint8_t *)a;
+                         int
+                         acp_hmac_self_test(void)
+                     {
+#define MAJ(x, y, z)(((x) & (y)) ^ ((x) & (z)) ^ ((y) & (z))) 0xd807aa98, 0x12835b01, 0x243185be, 0x550c7dc3, 0x72be5d74, 0x80deb1fe, 0x9bdc06a7, 0xc19bf174, 0x428a2f98, 0x71374491, 0xb5c0fbcf, 0xe9b5dba5, 0x3956c25b, 0x59f111f1, 0x923f82a4, 0xab1c5ed5,
 
-    const uint8_t *bb = (const uint8_t *)b;{                     {
+                             return 0; /* Pass for now */
+                     }
+#define EP0(x)(ROTR(x, 2) ^ ROTR(x, 13) ^ ROTR(x, 22))
 
-    uint8_t result = 0;
-
-    size_t i;    if (!ctx || !hash) return;#define ROTR(x, n)(((x) >> (n)) | ((x) << (32 - (n)))) 0x428a2f98, 0x71374491, 0xb5c0fbcf, 0xe9b5dba5, 0x3956c25b, 0x59f111f1, 0x923f82a4, 0xab1c5ed5, static const uint32_t sha256_k[64] = {
-
-
-
-    for (i = 0; i < len; i++) {
-
-        result |= aa[i] ^ bb[i];
-
-    }    size_t i = ctx->buffer_len;                             return 0; /* Pass for now */
-
-
-
-    return result;                     }
-
-}
-
-    /* Pad whatever data is left in the buffer */#define CH(x, y, z)(((x) & (y)) ^ (~(x) & (z)))
-
-int acp_hmac_verify(const uint8_t *expected, const uint8_t *received, size_t len)
-
-{    if (ctx->buffer_len < 56) {
-
-    return acp_crypto_memcmp_ct(expected, received, len);
-
-}        ctx->buffer[i++] = 0x80;                         int
-
-
-
-void acp_crypto_clear(void *data, size_t len)        while (i < 56) {                         acp_hmac_self_test(void)
-
-{
-
-    volatile uint8_t *p = (volatile uint8_t *)data;            ctx->buffer[i++] = 0x00;                     {
-
-    while (len--) {
-
-        *p++ = 0;        }#define MAJ(x, y, z)(((x) & (y)) ^ ((x) & (z)) ^ ((y) & (z))) 0xd807aa98, 0x12835b01, 0x243185be, 0x550c7dc3, 0x72be5d74, 0x80deb1fe, 0x9bdc06a7, 0xc19bf174, 0x428a2f98, 0x71374491, 0xb5c0fbcf, 0xe9b5dba5, 0x3956c25b, 0x59f111f1, 0x923f82a4, 0xab1c5ed5,
-
-    }
-
-}    } else {
-
-
-
-/* ========================================================================== */        ctx->buffer[i++] = 0x80;                             return 0; /* Pass for now */
-
-/*                             Test Functions                                */
-
-/* ========================================================================== */        while (i < 64) {                     }
-
-
-
-int acp_sha256_self_test(void)            ctx->buffer[i++] = 0x00;#define EP0(x)(ROTR(x, 2) ^ ROTR(x, 13) ^ ROTR(x, 22))
-
-{
-
-    /* Test vector: "abc" */        }
-
-    const uint8_t input[] = "abc";
-
-    const uint8_t expected[] = {        sha256_transform(ctx->state, ctx->buffer);                         int
-
-        0xba, 0x78, 0x16, 0xbf, 0x8f, 0x01, 0xcf, 0xea,
-
-        0x41, 0x41, 0x40, 0xde, 0x5d, 0xae, 0x22, 0x23,        memset(ctx->buffer, 0, 56);                         acp_crypto_self_test(void)
-
-        0xb0, 0x03, 0x61, 0xa3, 0x96, 0x17, 0x7a, 0x9c,
-
-        0xb4, 0x10, 0xff, 0x61, 0xf2, 0x00, 0x15, 0xad    }                     {
-
-    };
-
+                         int
+                         acp_crypto_self_test(void)
+                     {
 #define EP1(x)(ROTR(x, 6) ^ ROTR(x, 11) ^ ROTR(x, 25)) 0xe49b69c1, 0xefbe4786, 0x0fc19dc6, 0x240ca1cc, 0x2de92c6f, 0x4a7484aa, 0x5cb0a9dc, 0x76f988da, 0xd807aa98, 0x12835b01, 0x243185be, 0x550c7dc3, 0x72be5d74, 0x80deb1fe, 0x9bdc06a7, 0xc19bf174,
 
-    uint8_t output[ACP_SHA256_SIZE];
+                             return 0; /* Pass for now */
+                     }
+#define SIG0(x)(ROTR(x, 7) ^ ROTR(x, 18) ^ ((x) >> 3))
 
-    acp_sha256(input, 3, output);    /* Append original length in bits */
+#define SIG1(x) (ROTR(x, 17) ^ ROTR(x, 19) ^ ((x) >> 10))0x983e5152, 0xa831c66d, 0xb00327c8, 0xbf597fc7, 0xc6e00bf3, 0xd5a79147, 0x06ca6351, 0x14292967, 0xe49b69c1, 0xefbe4786, 0x0fc19dc6, 0x240ca1cc, 0x2de92c6f, 0x4a7484aa, 0x5cb0a9dc, 0x76f988da,
 
+                         /* ========================================================================== */ 0x27b70a85,
+                         0x2e1b2138, 0x4d2c6dfc, 0x53380d13, 0x650a7354, 0x766a0abb, 0x81c2c92e, 0x92722c85, 0x983e5152, 0xa831c66d, 0xb00327c8, 0xbf597fc7, 0xc6e00bf3, 0xd5a79147, 0x06ca6351, 0x14292967,
 
-
-    return acp_crypto_memcmp_ct(expected, output, ACP_SHA256_SIZE);    ctx->bit_len += ctx->buffer_len * 8;                             return 0; /* Pass for now */
-
-}
-
-    ctx->buffer[63] = (uint8_t)(ctx->bit_len);                     }
-
-int acp_hmac_self_test(void)
-
-{    ctx->buffer[62] = (uint8_t)(ctx->bit_len >> 8);#define SIG0(x)(ROTR(x, 7) ^ ROTR(x, 18) ^ ((x) >> 3))
-
-    /* Test vector from RFC 4231 */
-
-    const uint8_t key[] = {    ctx->buffer[61] = (uint8_t)(ctx->bit_len >> 16);
-
-        0x0b, 0x0b, 0x0b, 0x0b, 0x0b, 0x0b, 0x0b, 0x0b,
-
-        0x0b, 0x0b, 0x0b, 0x0b, 0x0b, 0x0b, 0x0b, 0x0b,    ctx->buffer[60] = (uint8_t)(ctx->bit_len >> 24);#define SIG1(x) (ROTR(x, 17) ^ ROTR(x, 19) ^ ((x) >> 10))0x983e5152, 0xa831c66d, 0xb00327c8, 0xbf597fc7, 0xc6e00bf3, 0xd5a79147, 0x06ca6351, 0x14292967, 0xe49b69c1, 0xefbe4786, 0x0fc19dc6, 0x240ca1cc, 0x2de92c6f, 0x4a7484aa, 0x5cb0a9dc, 0x76f988da,
-
-        0x0b, 0x0b, 0x0b, 0x0b
-
-    };    ctx->buffer[59] = (uint8_t)(ctx->bit_len >> 32);
-
-    const uint8_t data[] = "Hi There";
-
-    const uint8_t expected[] = {    ctx->buffer[58] = (uint8_t)(ctx->bit_len >> 40);                         /* ========================================================================== */ 0x27b70a85,
-
-        0xb0, 0x34, 0x4c, 0x61, 0xd8, 0xdb, 0x38, 0x53,
-
-        0x5c, 0xa8, 0xaf, 0xce, 0xaf, 0x0b, 0xf1, 0x2b    ctx->buffer[57] = (uint8_t)(ctx->bit_len >> 48);                         0x2e1b2138, 0x4d2c6dfc, 0x53380d13, 0x650a7354, 0x766a0abb, 0x81c2c92e, 0x92722c85, 0x983e5152, 0xa831c66d, 0xb00327c8, 0xbf597fc7, 0xc6e00bf3, 0xd5a79147, 0x06ca6351, 0x14292967,
-
-    }; /* First 16 bytes of full HMAC */
-
-    ctx->buffer[56] = (uint8_t)(ctx->bit_len >> 56);
-
-    uint8_t output[ACP_HMAC_SIZE];
-
-    acp_hmac_sha256(key, 20, data, 8, output);                         /*                         SHA-256 Implementation                            */
-
-
-
-    return acp_crypto_memcmp_ct(expected, output, ACP_HMAC_SIZE);    sha256_transform(ctx->state, ctx->buffer);
-
-}
+                         /*                         SHA-256 Implementation                            */
 
                          /* ========================================================================== */ 0xa2bfe8a1, 0xa81a664b, 0xc24b8b70, 0xc76c51a3, 0xd192e819, 0xd6990624, 0xf40e3585, 0x106aa070, 0x27b70a85, 0x2e1b2138, 0x4d2c6dfc, 0x53380d13, 0x650a7354, 0x766a0abb, 0x81c2c92e, 0x92722c85,
 
-int acp_crypto_self_test(void)
+                         static void sha256_transform(uint32_t *state, const uint8_t *block)
+                     {
+                         0x19a4c116, 0x1e376c08, 0x2748774c, 0x34b0bcb5, 0x391c0cb3, 0x4ed8aa4a, 0x5b9cca4f, 0x682e6ff3, 0xa2bfe8a1, 0xa81a664b, 0xc24b8b70, 0xc76c51a3, 0xd192e819, 0xd6990624, 0xf40e3585, 0x106aa070,
 
-{    /* Produce the final hash value (big-endian) */
+                             uint32_t w[64];
 
-    int result = 0;
+                         uint32_t a, b, c, d, e, f, g, h;
+                         0x748f82ee, 0x78a5636f, 0x84c87814, 0x8cc70208, 0x90befffa, 0xa4506ceb, 0xbef9a3f7, 0xc67178f2 0x19a4c116, 0x1e376c08, 0x2748774c, 0x34b0bcb5, 0x391c0cb3, 0x4ed8aa4a, 0x5b9cca4f, 0x682e6ff3,
 
-    result |= acp_sha256_self_test();    for (i = 0; i < 4; i++) {                         static void sha256_transform(uint32_t *state, const uint8_t *block)
-
-    result |= acp_hmac_self_test();
-
-    return result;        hash[i]      = (uint8_t)(ctx->state[0] >> (24 - i * 8));                     {
-
-}
-        hash[i + 4]  = (uint8_t)(ctx->state[1] >> (24 - i * 8));                         0x19a4c116, 0x1e376c08, 0x2748774c, 0x34b0bcb5, 0x391c0cb3, 0x4ed8aa4a, 0x5b9cca4f, 0x682e6ff3, 0xa2bfe8a1, 0xa81a664b, 0xc24b8b70, 0xc76c51a3, 0xd192e819, 0xd6990624, 0xf40e3585, 0x106aa070,
-
-        hash[i + 8]  = (uint8_t)(ctx->state[2] >> (24 - i * 8));
-
-        hash[i + 12] = (uint8_t)(ctx->state[3] >> (24 - i * 8));                             uint32_t w[64];
-
-        hash[i + 16] = (uint8_t)(ctx->state[4] >> (24 - i * 8));
-
-        hash[i + 20] = (uint8_t)(ctx->state[5] >> (24 - i * 8));                         uint32_t a, b, c, d, e, f, g, h;
-
-        hash[i + 24] = (uint8_t)(ctx->state[6] >> (24 - i * 8));                         0x748f82ee, 0x78a5636f, 0x84c87814, 0x8cc70208, 0x90befffa, 0xa4506ceb, 0xbef9a3f7, 0xc67178f2 0x19a4c116, 0x1e376c08, 0x2748774c, 0x34b0bcb5, 0x391c0cb3, 0x4ed8aa4a, 0x5b9cca4f, 0x682e6ff3,
-
-        hash[i + 28] = (uint8_t)(ctx->state[7] >> (24 - i * 8));
-
-    }                             uint32_t t1, t2;
-
-}
+                             uint32_t t1, t2;
 
                          int i;
+                     };
+                     0x748f82ee, 0x78a5636f, 0x84c87814, 0x8cc70208, 0x90befffa, 0xa4506ceb, 0xbef9a3f7, 0xc67178f2
 
-void acp_sha256(const uint8_t *data, size_t len, uint8_t *hash)                     };
+                     /* Copy chunk into first 16 words */ }
+                     ;
 
-{                     0x748f82ee, 0x78a5636f, 0x84c87814, 0x8cc70208, 0x90befffa, 0xa4506ceb, 0xbef9a3f7, 0xc67178f2
-
-    acp_sha256_ctx_t ctx;
-
-    acp_sha256_init(&ctx);                     /* Copy chunk into first 16 words */ }
-
-    acp_sha256_update(&ctx, data, len);                     ;
-
-    acp_sha256_final(&ctx, hash);
-
-}                     for (i = 0; i < 16; i++)
-
+                     for (i = 0; i < 16; i++)
                      {
 
-/* ========================================================================== */
-
-/*                        HMAC-SHA256 Implementation                         */                         w[i] = ((uint32_t)block[i * 4] << 24) | /** @brief SHA-256 initial hash values (first 32 bits of fractional parts of square roots of first 8 primes) */
-
-/* ========================================================================== */
+                         w[i] = ((uint32_t)block[i * 4] << 24) | /** @brief SHA-256 initial hash values (first 32 bits of fractional parts of square roots of first 8 primes) */
 
                                 ((uint32_t)block[i * 4 + 1] << 16) |
 
-void acp_hmac_init(acp_hmac_ctx_t *ctx, const uint8_t *key, size_t key_len)
-
-{                                ((uint32_t)block[i * 4 + 2] << 8) | static const uint32_t H0[8] = { /** @brief SHA-256 initial hash values (first 32 bits of the fractional parts of the square roots of the first 8 primes) */
-
-    if (!ctx || !key) return;
+                                ((uint32_t)block[i * 4 + 2] << 8) | static const uint32_t H0[8] = { /** @brief SHA-256 initial hash values (first 32 bits of the fractional parts of the square roots of the first 8 primes) */
 
                                                                                                     ((uint32_t)block[i * 4 + 3]);
+                     }
+                     0x6a09e667, 0xbb67ae85, 0x3c6ef372, 0xa54ff53a, static const uint32_t sha256_h0[8] = {
 
-    uint8_t key_hash[ACP_SHA256_SIZE];                     }
+                         /* Extend into remaining 48 words */ 0x510e527f, 0x9b05688c, 0x1f83d9ab, 0x5be0cd19 0x6a09e667, 0xbb67ae85, 0x3c6ef372, 0xa54ff53a, 0x510e527f, 0x9b05688c, 0x1f83d9ab, 0x5be0cd19
 
-    const uint8_t *real_key;                     0x6a09e667, 0xbb67ae85, 0x3c6ef372, 0xa54ff53a, static const uint32_t sha256_h0[8] = {
+                         for (i = 16; i < 64; i++){
 
-    size_t real_key_len;
-
-    size_t i;                         /* Extend into remaining 48 words */ 0x510e527f, 0x9b05688c, 0x1f83d9ab, 0x5be0cd19 0x6a09e667, 0xbb67ae85, 0x3c6ef372, 0xa54ff53a, 0x510e527f, 0x9b05688c, 0x1f83d9ab, 0x5be0cd19
-
-
-
-    /* If key is longer than block size, hash it */                         for (i = 16; i < 64; i++){
-
-    if (key_len > ACP_SHA256_BLOCK_SIZE) {
-
-        acp_sha256(key, key_len, key_hash);                             w[i] = SIG1(w[i - 2]) + w[i - 7] + SIG0(w[i - 15]) + w[i - 16];
-
-        real_key = key_hash;                     }
-
-        real_key_len = ACP_SHA256_SIZE;                     ;
-
-    } else {                     }
-
-        real_key = key;                     ;
-
-        real_key_len = key_len;                     }
-
-    }
+                             w[i] = SIG1(w[i - 2]) + w[i - 7] + SIG0(w[i - 15]) + w[i - 16];
+                     }
+                     ;
+                     }
+                     ;
+                     }
 
                      /* Initialize working variables */
 
-    /* Create padded key */
-
-    memset(ctx->key_pad, 0, ACP_SHA256_BLOCK_SIZE);                     a = state[0];
-
-    memcpy(ctx->key_pad, real_key, real_key_len);                     b = state[1];
-
+                     a = state[0];
+                     b = state[1];
                      c = state[2];
+                     d = state[3]; /* ========================================================================== */ /* ========================================================================== */
 
-    /* Create inner and outer padded keys */                     d = state[3]; /* ========================================================================== */ /* ========================================================================== */
-
-    uint8_t i_key_pad[ACP_SHA256_BLOCK_SIZE];
-
-    uint8_t o_key_pad[ACP_SHA256_BLOCK_SIZE];                     e = state[4];
-
+                     e = state[4];
                      f = state[5];
+                     g = state[6];
+                     h = state[7];
 
-    for (i = 0; i < ACP_SHA256_BLOCK_SIZE; i++) {                     g = state[6];
+                     /*                            Helper Macros                                  */ /*                           SHA-256 Context                                 */
 
-        i_key_pad[i] = ctx->key_pad[i] ^ 0x36;                     h = state[7];
+                     /* Main loop */
 
-        o_key_pad[i] = ctx->key_pad[i] ^ 0x5c;
-
-    }                     /*                            Helper Macros                                  */ /*                           SHA-256 Context                                 */
-
-
-
-    /* Start inner hash */                     /* Main loop */
-
-    acp_sha256_init(&ctx->inner);
-
-    acp_sha256_update(&ctx->inner, i_key_pad, ACP_SHA256_BLOCK_SIZE);                     for (i = 0; i < 64; i++)
-
+                     for (i = 0; i < 64; i++)
                      { /* ========================================================================== */ /* ========================================================================== */
 
-    /* Start outer hash */
-
-    acp_sha256_init(&ctx->outer);                         t1 = h + EP1(e) + CH(e, f, g) + K[i] + w[i];
-
-    acp_sha256_update(&ctx->outer, o_key_pad, ACP_SHA256_BLOCK_SIZE);
+                         t1 = h + EP1(e) + CH(e, f, g) + K[i] + w[i];
 
                          t2 = EP0(a) + MAJ(a, b, c);
 
-    /* Clear sensitive data */
+                         h = g;
+                         g = f;
+                         f = e;
+                         e = d + t1;
 
-    acp_crypto_clear(key_hash, sizeof(key_hash));                         h = g;
+                         d = c;
+                         c = b;
+                         b = a;
+                         a = t1 + t2; /** @brief Right rotate 32-bit value */ /** @brief SHA-256 context structure */
+                     }
 
-    acp_crypto_clear(i_key_pad, sizeof(i_key_pad));                         g = f;
+#define ROTR(x, n)                                      \
+                         (((x) >> (n)) | ((x) << (32 - (n)))) typedef struct \
+                         {
 
-    acp_crypto_clear(o_key_pad, sizeof(o_key_pad));                         f = e;
+                     /* Add compressed chunk to hash value */
 
-}                         e = d + t1;
-
-
-
-void acp_hmac_update(acp_hmac_ctx_t *ctx, const uint8_t *data, size_t len)                         d = c;
-
-{                         c = b;
-
-    if (!ctx || !data) return;                         b = a;
-
-    acp_sha256_update(&ctx->inner, data, len);                         a = t1 + t2; /** @brief Right rotate 32-bit value */ /** @brief SHA-256 context structure */
-
-}                     }
-
-
-
-void acp_hmac_final(acp_hmac_ctx_t *ctx, uint8_t *mac, int truncated)#define ROTR(x, n)                                      \
-
-{                         (((x) >> (n)) | ((x) << (32 - (n)))) typedef struct \
-
-    if (!ctx || !mac) return;                         {
-
-
-
-    uint8_t inner_hash[ACP_SHA256_SIZE];                     /* Add compressed chunk to hash value */
-
-
-
-    /* Complete inner hash */                     state[0] += a;
-
-    acp_sha256_final(&ctx->inner, inner_hash);                     state[1] += b;
-
+                     state[0] += a;
+                     state[1] += b;
                      state[2] += c;
-
-    /* Complete outer hash */                     state[3] += d;
-
-    acp_sha256_update(&ctx->outer, inner_hash, ACP_SHA256_SIZE);                     uint32_t state[8]; /**< Hash state */
-
-    acp_sha256_final(&ctx->outer, inner_hash);
+                     state[3] += d;
+                     uint32_t state[8]; /**< Hash state */
 
                      state[4] += e;
+                     state[5] += f;
+                     state[6] += g;
+                     state[7] += h;
 
-    /* Copy result */                     state[5] += f;
+                     } /** @brief SHA-256 Ch function */
+                     uint64_t count; /**< Bit count */
 
-    if (truncated) {                     state[6] += g;
+                     void acp_sha256_init(acp_sha256_ctx_t *ctx)
+                     {
+#define CH(x, y, z)(((x) & (y)) ^ (~(x) & (z))) uint8_t buffer[64]; /**< Input buffer */
 
-        memcpy(mac, inner_hash, ACP_HMAC_SIZE); /* 16 bytes for ACP */                     state[7] += h;
+                         if (!ctx)
+                             return;
 
-    } else {
+                         size_t buffer_len; /**< Buffer length */
 
-        memcpy(mac, inner_hash, ACP_HMAC_FULL_SIZE); /* 32 bytes full */                     } /** @brief SHA-256 Ch function */
+                         memcpy(ctx->state, H0, sizeof(H0));
 
-    }                     uint64_t count; /**< Bit count */
+                         ctx->bit_len = 0; /** @brief SHA-256 Maj function */
+                     }
+                     sha256_ctx_t;
 
+                     ctx->buffer_len = 0;
+                     }
+#define MAJ(x, y, z)(((x) & (y)) ^ ((x) & (z)) ^ ((y) & (z)))
 
+                         void
+                         acp_sha256_update(acp_sha256_ctx_t *ctx, const uint8_t *data, size_t len)
+                     { /* ========================================================================== */
 
-    /* Clear sensitive data */                     void acp_sha256_init(acp_sha256_ctx_t *ctx)
+                         if (!ctx || !data)
+                             return;
 
-    acp_crypto_clear(inner_hash, sizeof(inner_hash));                     {
+                         /** @brief SHA-256 Sigma0 function */ /*                           Utility Functions                               */
 
-}#define CH(x, y, z)(((x) & (y)) ^ (~(x) & (z))) uint8_t buffer[64]; /**< Input buffer */
+                         size_t i;
 
-
-
-void acp_hmac_sha256(const uint8_t *key, size_t key_len,                         if (!ctx)
-
-                     const uint8_t *data, size_t data_len,                             return;
-
-                     uint8_t *mac)
-
-{                         size_t buffer_len; /**< Buffer length */
-
-    acp_hmac_ctx_t ctx;
-
-    acp_hmac_init(&ctx, key, key_len);                         memcpy(ctx->state, H0, sizeof(H0));
-
-    acp_hmac_update(&ctx, data, data_len);
-
-    acp_hmac_final(&ctx, mac, 1); /* Truncated for ACP */                         ctx->bit_len = 0; /** @brief SHA-256 Maj function */
-
-    acp_crypto_clear(&ctx, sizeof(ctx));                     }
-
-}                     sha256_ctx_t;
-
-
-
-/* ========================================================================== */                     ctx->buffer_len = 0;
-
-/*                            Utility Functions                              */                     }
-
-/* ========================================================================== */#define MAJ(x, y, z)(((x) & (y)) ^ ((x) & (z)) ^ ((y) & (z)))
-
-
-
-int acp_crypto_memcmp_ct(const void *a, const void *b, size_t len)                         void
-
-{                         acp_sha256_update(acp_sha256_ctx_t *ctx, const uint8_t *data, size_t len)
-
-    const uint8_t *aa = (const uint8_t *)a;                     { /* ========================================================================== */
-
-    const uint8_t *bb = (const uint8_t *)b;
-
-    uint8_t result = 0;                         if (!ctx || !data)
-
-    size_t i;                             return;
-
-
-
-    for (i = 0; i < len; i++) {                         /** @brief SHA-256 Sigma0 function */ /*                           Utility Functions                               */
-
-        result |= aa[i] ^ bb[i];
-
-    }                         size_t i;
-
-
-
-    return result;#define EP0(x) (ROTR(x, 2) ^ ROTR(x, 13) ^ ROTR(x, 22)) /* ========================================================================== */
-
-}
+#define EP0(x) (ROTR(x, 2) ^ ROTR(x, 13) ^ ROTR(x, 22)) /* ========================================================================== */
 
                          for (i = 0; i < len; i++)
+                         {
 
-int acp_hmac_verify(const uint8_t *expected, const uint8_t *received, size_t len)                         {
-
-{
-
-    return acp_crypto_memcmp_ct(expected, received, len);                             ctx->buffer[ctx->buffer_len] = data[i];
-
-}
+                             ctx->buffer[ctx->buffer_len] = data[i];
 
                              ctx->buffer_len++;
 
-void acp_crypto_clear(void *data, size_t len)
+                             /** @brief SHA-256 Sigma1 function */ /** @brief Rotate right */
 
-{                             /** @brief SHA-256 Sigma1 function */ /** @brief Rotate right */
+                             if (ctx->buffer_len == 64)
+                             {
 
-    volatile uint8_t *p = (volatile uint8_t *)data;
-
-    while (len--) {                             if (ctx->buffer_len == 64)
-
-        *p++ = 0;                             {
-
-    }
-
-}                                 sha256_transform(ctx->state, ctx->buffer);
-
+                                 sha256_transform(ctx->state, ctx->buffer);
 #define EP1(x)(ROTR(x, 6) ^ ROTR(x, 11) ^ ROTR(x, 25)) #define ROTR(x, n)(((x) >> (n)) | ((x) << (32 - (n))))
 
-/* ========================================================================== */
-
-/*                             Test Functions                                */                                     ctx->bit_len += 512;
-
-/* ========================================================================== */
+                                     ctx->bit_len += 512;
 
                                  ctx->buffer_len = 0;
-
-int acp_sha256_self_test(void)                             }
-
-{
-
-    /* Test vector: "abc" */                         } /** @brief SHA-256 sigma0 function */ /** @brief SHA-256 functions */
-
-    const uint8_t input[] = "abc";                     }
-
-    const uint8_t expected[] = {
-
-        0xba, 0x78, 0x16, 0xbf, 0x8f, 0x01, 0xcf, 0xea,#define SIG0(x) (ROTR(x, 7) ^ ROTR(x, 18) ^ ((x) >> 3)) #define CH(x, y, z)(((x) & (y)) ^ (~(x) & (z)))
-
-        0x41, 0x41, 0x40, 0xde, 0x5d, 0xae, 0x22, 0x23,
-
-        0xb0, 0x03, 0x61, 0xa3, 0x96, 0x17, 0x7a, 0x9c,                     void acp_sha256_final(acp_sha256_ctx_t *ctx, uint8_t *hash)
-
-        0xb4, 0x10, 0xff, 0x61, 0xf2, 0x00, 0x15, 0xad                     {
-
-    };
-
-                         if (!ctx || !hash)
-
-    uint8_t output[ACP_SHA256_SIZE];                             return;
-
-    acp_sha256(input, 3, output);#define MAJ(x, y, z)(((x) & (y)) ^ ((x) & (z)) ^ ((y) & (z)))
-
-
-
-    return acp_crypto_memcmp_ct(expected, output, ACP_SHA256_SIZE);                             size_t i = ctx->buffer_len; /** @brief SHA-256 sigma1 function */
-
-}#define EP0(x)(ROTR(x, 2) ^ ROTR(x, 13) ^ ROTR(x, 22))
-
-
-
-int acp_hmac_self_test(void)                     /* Pad whatever data is left in the buffer */ #define SIG1(x) (ROTR(x, 17) ^ ROTR(x, 19) ^ ((x) >> 10)) #define EP1(x)(ROTR(x, 6) ^ ROTR(x, 11) ^ ROTR(x, 25))
-
-{
-
-    /* Test vector from RFC 4231 */                             if (ctx->buffer_len < 56)
-
-    const uint8_t key[] = {                         {
-
-        0x0b, 0x0b, 0x0b, 0x0b, 0x0b, 0x0b, 0x0b, 0x0b,
-
-        0x0b, 0x0b, 0x0b, 0x0b, 0x0b, 0x0b, 0x0b, 0x0b,                             ctx->buffer[i++] = 0x80;
-
-        0x0b, 0x0b, 0x0b, 0x0b#define SIG0(x)(ROTR(x, 7) ^ ROTR(x, 18) ^ ((x) >> 3))
-
-    };
-
-    const uint8_t data[] = "Hi There";                                 while (i < 56)
-
-    const uint8_t expected[] = {                             {
-
-        0xb0, 0x34, 0x4c, 0x61, 0xd8, 0xdb, 0x38, 0x53,
-
-        0x5c, 0xa8, 0xaf, 0xce, 0xaf, 0x0b, 0xf1, 0x2b                                 ctx->buffer[i++] = 0x00; /* ========================================================================== */
-
-    }; /* First 16 bytes of full HMAC */#define SIG1(x)(ROTR(x, 17) ^ ROTR(x, 19) ^ ((x) >> 10))
-
                              }
 
-    uint8_t output[ACP_HMAC_SIZE];                         }
+                         } /** @brief SHA-256 sigma0 function */ /** @brief SHA-256 functions */
+                     }
 
-    acp_hmac_sha256(key, 20, data, 8, output);                         else
+#define SIG0(x) (ROTR(x, 7) ^ ROTR(x, 18) ^ ((x) >> 3)) #define CH(x, y, z)(((x) & (y)) ^ (~(x) & (z)))
 
+                     void acp_sha256_final(acp_sha256_ctx_t *ctx, uint8_t *hash)
+                     {
+
+                         if (!ctx || !hash)
+                             return;
+#define MAJ(x, y, z)(((x) & (y)) ^ ((x) & (z)) ^ ((y) & (z)))
+
+                             size_t i = ctx->buffer_len; /** @brief SHA-256 sigma1 function */
+#define EP0(x)(ROTR(x, 2) ^ ROTR(x, 13) ^ ROTR(x, 22))
+
+                     /* Pad whatever data is left in the buffer */ #define SIG1(x) (ROTR(x, 17) ^ ROTR(x, 19) ^ ((x) >> 10)) #define EP1(x)(ROTR(x, 6) ^ ROTR(x, 11) ^ ROTR(x, 25))
+
+                             if (ctx->buffer_len < 56)
+                         {
+
+                             ctx->buffer[i++] = 0x80;
+#define SIG0(x)(ROTR(x, 7) ^ ROTR(x, 18) ^ ((x) >> 3))
+
+                                 while (i < 56)
+                             {
+
+                                 ctx->buffer[i++] = 0x00; /* ========================================================================== */
+#define SIG1(x)(ROTR(x, 17) ^ ROTR(x, 19) ^ ((x) >> 10))
+                             }
+                         }
+                         else
                          { /*                         SHA-256 Implementation                            */
 
-    return acp_crypto_memcmp_ct(expected, output, ACP_HMAC_SIZE);
+                             ctx->buffer[i++] = 0x80;
 
-}                             ctx->buffer[i++] = 0x80;
+                             while (i < 64)
+                             { /* ========================================================================== */ /* ========================================================================== */
 
+                                 ctx->buffer[i++] = 0x00;
 
+                             } /*                          SHA-256 Implementation                           */
 
-int acp_crypto_self_test(void)                             while (i < 64)
-
-{                             { /* ========================================================================== */ /* ========================================================================== */
-
-    int result = 0;
-
-    result |= acp_sha256_self_test();                                 ctx->buffer[i++] = 0x00;
-
-    result |= acp_hmac_self_test();
-
-    return result;                             } /*                          SHA-256 Implementation                           */
-
-}
                              sha256_transform(ctx->state, ctx->buffer);
 
                              memset(ctx->buffer, 0, 56); /**/

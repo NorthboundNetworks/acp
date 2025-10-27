@@ -50,28 +50,27 @@ extern "C"
      * @brief Create a new mutex
      * @return acp_mutex_t handle, or NULL on failure
      */
-    acp_mutex_t acp_mutex_create(void);
+    acp_mutex_t *acp_platform_mutex_create(void);
 
     /**
      * @brief Lock the mutex (blocking)
      * @param mutex Handle to the mutex
      * @return int 0 on success, non-zero on error
      */
-    int acp_mutex_lock(acp_mutex_t mutex);
+    int acp_platform_mutex_lock(acp_mutex_t *mutex);
 
     /**
      * @brief Unlock the mutex
      * @param mutex Handle to the mutex
      * @return int 0 on success, non-zero on error
      */
-    int acp_mutex_unlock(acp_mutex_t mutex);
+    int acp_platform_mutex_unlock(acp_mutex_t *mutex);
 
     /**
      * @brief Destroy a mutex and release resources
      * @param mutex Handle to the mutex
-     * @return int 0 on success, non-zero on error
      */
-    int acp_mutex_destroy(acp_mutex_t mutex);
+    void acp_platform_mutex_destroy(acp_mutex_t *mutex);
 
 #ifdef __cplusplus
 }

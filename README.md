@@ -93,6 +93,24 @@ Planned and tracked in `specs/001-acp-protocol-spec/tasks.md`:
 
 The public API header `acp_protocol.h` and versioning header will be introduced per tasks (T009–T012). A draft of the API is available in `specs/001-acp-protocol-spec/contracts/c-api.md`.
 
+## Build Matrix
+
+| Platform | Compiler | Static Lib | Shared Lib | CI Status |
+|----------|----------|------------|------------|-----------|
+| Linux x64 | GCC 9+ | ✓ | ✓ | ![Build Status](https://github.com/pzanna/acp/workflows/Build%20and%20Test/badge.svg) |
+| Linux x64 | Clang 10+ | ✓ | ✓ | ![Build Status](https://github.com/pzanna/acp/workflows/Build%20and%20Test/badge.svg) |
+| macOS x64 | Clang (Xcode) | ✓ | ✓ | ![Build Status](https://github.com/pzanna/acp/workflows/Build%20and%20Test/badge.svg) |
+| Windows x64 | MinGW-w64 | ✓ | ⚠️ Deferred | ![Build Status](https://github.com/pzanna/acp/workflows/Build%20and%20Test/badge.svg) |
+| Windows x64 | MSVC | ⚠️ v0.4+ | ⚠️ v0.4+ | Not supported in v0.3 |
+
+**Legend:**
+
+- ✓ Supported and tested in CI
+- ⚠️ Planned for future release  
+- ❌ Not supported
+
+**Dependencies:** Standard C library only (C99 compliant)
+
 ## License
 
 MIT License
