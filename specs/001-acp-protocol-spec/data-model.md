@@ -6,16 +6,16 @@ This document captures the core entities, fields, relationships, and validation 
 
 ### ACP Frame
 
-- Fields:
+- Fields (wire format order):
   - version: u8 (protocol version)
-  - type: u8 (telemetry, command, system)
+  - type: u8 (telemetry, command, system)  
   - flags: u8 (auth-enabled, reserved bits)
   - reserved: u8 (must be 0 in v0.3)
   - length: u16 (payload length in bytes; 0..1024)
-  - seq: u32 (only present if auth-enabled)
+  - seq: u32 (only present if auth-enabled flag set)
   - payload: bytes[length]
-  - crc16: u16 (CRC16-CCITT over header (except crc field) + payload; excludes HMAC)
-  - hmac16: 16 bytes (optional; HMAC-SHA256 truncated to 16 bytes over authenticated region)
+  - crc16: u16 (CRC16-CCITT over header + payload; excludes HMAC)
+  - hmac16: 16 bytes (optional; HMAC-SHA256 truncated, only present if auth-enabled flag set)
 - Relationships:
   - Bound to a Session when auth-enabled.
 - Validation rules:

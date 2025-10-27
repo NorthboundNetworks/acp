@@ -104,8 +104,8 @@ Applications can use default logging, time, mutex, and keystore shims on support
 - FR-011: Include example applications in `examples/` (e.g., `acp_client.c`, `mock_serial.c`) that demonstrate encoding, session auth, and decoding in a minimal loop.
 - FR-012: Maintain backward-compatible versioning (semver) and a stable `acp_protocol.h` interface.
 - FR-013: Use packed structs and explicit, endian-safe field definitions; wire format is network byte order; add protocol version tags to frames.
-- FR-014: Default build avoids dynamic memory allocation; if optional allocation is supported, it must be explicitly opt-in at compile time and fully stub-safe.
-- FR-015: Windows toolchain support targets MinGW for official support in this release; MSVC support may be added in a subsequent release.
+- FR-014: Default build avoids dynamic memory allocation (enforced via `ACP_NO_HEAP` compile flag, default ON); optional allocation features require explicit `ACP_ENABLE_HEAP` flag and must provide stub implementations that work without heap access for embedded/testing scenarios.
+- FR-015: Windows toolchain support targets MinGW for official support in this release; MSVC support is explicitly out of scope for v0.3 and will be evaluated for v0.4+ based on community demand.
 - FR-016: Keystore: default file-based keystore in the user configuration directory; manual key rotation documented for integrators (no automatic rotation in core). The default keystore backend is provided in `acp_nvs.c` (default file-based keystore).
 - FR-017: Payload size limit: maximum payload size is 1024 bytes. Frames exceeding this limit MUST be rejected with an explicit error; segmentation, if needed, is the responsibility of calling applications.
 

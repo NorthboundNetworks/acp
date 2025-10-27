@@ -122,6 +122,7 @@ Tasks:
 - [ ] T048 [P] Add payload boundary tests (1024 bytes) in /Users/paulzanna/Github/acp/tests/payload_boundary_test.c
 - [ ] T049 [P] Add CRC mismatch tests in /Users/paulzanna/Github/acp/tests/crc_mismatch_test.c
 - [ ] T050 Update docs with protocol versioning and framing details in /Users/paulzanna/Github/acp/docs/acp_comm_spec_v0-3.md
+- [ ] T067 [Docs] Create complete protocol specification document with wire format, message types, and conformance requirements in /Users/paulzanna/Github/acp/docs/acp_comm_spec_v0-3.md
 - [ ] T058 [Tests] Add no-heap verification (link wrap or symbol scan) in /Users/paulzanna/Github/acp/tests/no_heap_check.c
 - [ ] T059 [Docs] Document no-heap default and enabling heap features in /Users/paulzanna/Github/acp/README.md
 - [ ] T066 [Docs] Document keystore file format and manual key rotation steps in /Users/paulzanna/Github/acp/docs/keystore.md
