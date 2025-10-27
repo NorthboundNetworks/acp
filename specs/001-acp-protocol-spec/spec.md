@@ -5,6 +5,10 @@
 **Status**: Draft  
 **Input**: User description captured from SpecKit.specify request (see repository context)
 
+## Overview
+
+This feature delivers a portable, C99 reference implementation of the Autonomous Command Protocol (ACP) with secure framing, authentication, and platform abstractions. The goal is to make it easy for teams to encode, transmit, and verify telemetry and command frames across Linux, macOS, Windows, and embedded systems, with stable headers, clear documentation, and reproducible builds. The result is a small, dependable library that downstream apps can integrate without taking on OS-specific complexity.
+
 ## User Scenarios & Testing (mandatory)
 
 ### User Story 1 - Encode/Decode Telemetry Frame (Priority: P1)
@@ -84,15 +88,15 @@ Applications can use default logging, time, mutex, and keystore shims on support
 - FR-005: Provide platform abstraction headers and default backends: logging (`acp_platform_log.h`), time (`acp_platform_time.h`), mutexes (`acp_platform_mutex.h`), and persistent keystore (`acp_platform_keystore.h`).
 - FR-006: Supply default POSIX backends for Linux/macOS and Windows backends or fallbacks as part of the distribution.
 - FR-007: Provide compile-time tests and known-good vectors under `tests/` including CRC16, HMAC-SHA256, COBS framing, and round-trip frame encode/decode.
-- FR-008: Package builds to generate `libacp.a` and `libacp.so`/`.dylib`; Windows shared library output [NEEDS CLARIFICATION: Should a `.dll` also be produced and versioned?].
+- FR-008: Package builds generate `libacp.a` and `libacp.so`/`.dylib`. On Windows, produce a static library only for this release; deferring `.dll` output and versioning to a later release.
 - FR-009: Support standard build systems (make and CMake) with minimal dependencies; produce both static and shared libraries.
 - FR-010: Provide complete documentation: Doxygen for all public APIs, `README.md` with architecture/usage/build/platform notes, protocol framing spec in `docs/acp-v0.2.md`.
 - FR-011: Include example applications in `examples/` (e.g., `acp_client.c`, `mock_serial.c`) that demonstrate encoding, session auth, and decoding in a minimal loop.
 - FR-012: Maintain backward-compatible versioning (semver) and a stable `acp_protocol.h` interface.
 - FR-013: Use packed structs and explicit, endian-safe field definitions; wire format is network byte order; add protocol version tags to frames.
 - FR-014: Default build avoids dynamic memory allocation; if optional allocation is supported, it must be explicitly opt-in at compile time and fully stub-safe.
-- FR-015: Windows toolchain support [NEEDS CLARIFICATION: Require MinGW, MSVC, or both for official support?].
-- FR-016: Keystore behavior [NEEDS CLARIFICATION: Key storage location/format and rotation policy for HMAC keys].
+- FR-015: Windows toolchain support targets MinGW for official support in this release; MSVC support may be added in a subsequent release.
+- FR-016: Keystore: default file-based keystore in the user configuration directory; manual key rotation documented for integrators (no automatic rotation in core).
 
 ### Key Entities (data-oriented)
 
