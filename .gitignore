@@ -77,3 +77,15 @@ autom4te.cache/
 *.tmp
 *.swp
 coverage/
+
+# ACP-specific build artifacts
+test_cobs
+test_telemetry
+test_hmac
+tests/test_session
+acp_keystore.bin
+
+# Legacy and backup files
+*.legacy
+*.backup
+*_stub.c

@@ -7,15 +7,18 @@
 #include <stdio.h>
 #include <string.h>
 
-void print_hex(const char *label, const uint8_t *data, size_t len) {
+void print_hex(const char *label, const uint8_t *data, size_t len)
+{
     printf("%s: ", label);
-    for (size_t i = 0; i < len; i++) {
+    for (size_t i = 0; i < len; i++)
+    {
         printf("%02x", data[i]);
     }
     printf("\n");
 }
 
-int main(void) {
+int main(void)
+{
     printf("ACP Crypto Test - HMAC-SHA256 Implementation\n");
     printf("============================================\n\n");
 
@@ -40,16 +43,15 @@ int main(void) {
         0xde, 0xad, 0xbe, 0xef, 0xca, 0xfe, 0xba, 0xbe,
         0x01, 0x23, 0x45, 0x67, 0x89, 0xab, 0xcd, 0xef,
         0xfe, 0xdc, 0xba, 0x98, 0x76, 0x54, 0x32, 0x10,
-        0xaa, 0xbb, 0xcc, 0xdd, 0xee, 0xff, 0x00, 0x11
-    };
-    
+        0xaa, 0xbb, 0xcc, 0xdd, 0xee, 0xff, 0x00, 0x11};
+
     const uint8_t test_data[] = "ACP Test Message";
     uint8_t hmac_result[ACP_HMAC_SIZE];
-    
-    acp_hmac_sha256(acp_key, sizeof(acp_key), test_data, strlen((char*)test_data), hmac_result);
-    
+
+    acp_hmac_sha256(acp_key, sizeof(acp_key), test_data, strlen((char *)test_data), hmac_result);
+
     print_hex("Key", acp_key, 32);
-    print_hex("Data", test_data, strlen((char*)test_data));
+    print_hex("Data", test_data, strlen((char *)test_data));
     print_hex("HMAC-SHA256 (16-byte truncated)", hmac_result, ACP_HMAC_SIZE);
 
     /* Test 5: Constant-time comparison */
@@ -63,7 +65,7 @@ int main(void) {
 
     int same = acp_crypto_memcmp_ct(mac1, mac2, 16);
     int different = acp_crypto_memcmp_ct(mac1, mac3, 16);
-    
+
     printf("Same MACs comparison: %s\n", same == 0 ? "EQUAL" : "DIFFERENT");
     printf("Different MACs comparison: %s\n", different != 0 ? "DIFFERENT" : "EQUAL");
 

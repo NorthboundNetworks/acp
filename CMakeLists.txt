@@ -77,11 +77,13 @@ add_compile_definitions(
 )
 
 # Compiler flags
-add_compile_options(
-    -Wall -Wextra -Wpedantic
-    $<$<CONFIG:Debug>:-g -O0>
-    $<$<CONFIG:Release>:-O2 -DNDEBUG>
-)
+add_compile_options(-Wall -Wextra -Wpedantic)
+
+if(CMAKE_BUILD_TYPE STREQUAL "Debug")
+    add_compile_options(-g -O0)
+else()
+    add_compile_options(-O2 -DNDEBUG)
+endif()
 
 # Static library target
 if(ACP_BUILD_STATIC)
