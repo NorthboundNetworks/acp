@@ -107,7 +107,7 @@ const char *acp_get_frame_type_name(uint8_t frame_type)
  */
 const char *acp_get_error_name(int error)
 {
-    if (error < acp_error_count)
+    if (error >= 0 && (size_t)error < acp_error_count)
     {
         return acp_error_names[error];
     }

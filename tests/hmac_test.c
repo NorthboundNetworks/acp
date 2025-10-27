@@ -222,6 +222,7 @@ static void validate_truncation_properties(void)
     /* Test constant-time comparison with truncated values */
     int ct_result = acp_crypto_memcmp_ct(hmac1, hmac2, ACP_HMAC_TAG_LEN);
     assert(ct_result != 0); /* Should be different */
+    (void)ct_result;        /* Suppress unused warning in release builds */
     printf("  ✓ Constant-time comparison works with truncated HMACs\n");
 
     printf("  ✓ Truncation properties validated\n");

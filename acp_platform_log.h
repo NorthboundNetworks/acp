@@ -48,7 +48,12 @@ extern "C"
         va_list args;
         va_start(args, fmt);
         fprintf(stderr, "[ACP][%s] ", level);
+
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wformat-nonliteral"
         vfprintf(stderr, fmt, args);
+#pragma clang diagnostic pop
+
         fprintf(stderr, "\n");
         va_end(args);
     }

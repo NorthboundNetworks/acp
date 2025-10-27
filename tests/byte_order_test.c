@@ -27,7 +27,7 @@ static void print_hex(const char *label, const uint8_t *data, size_t len)
     printf("\n");
 }
 
-static int compare_bytes(const uint8_t *expected, const uint8_t *actual, size_t len, const char *test_name)
+static int __attribute__((unused)) compare_bytes(const uint8_t *expected, const uint8_t *actual, size_t len, const char *test_name)
 {
     if (memcmp(expected, actual, len) == 0)
     {
