@@ -96,7 +96,7 @@ Applications can use default logging, time, mutex, and keystore shims on support
 - FR-007: Provide compile-time tests and known-good vectors under `tests/` including CRC16, HMAC-SHA256, COBS framing, and round-trip frame encode/decode.
 - FR-008: Package builds generate `libacp.a` and `libacp.so`/`.dylib`. On Windows, produce a static library only for this release; deferring `.dll` output and versioning to a later release.
 - FR-009: Support standard build systems (make and CMake) with minimal dependencies; produce both static and shared libraries.
-- FR-010: Provide complete documentation: Doxygen for all public APIs, `README.md` with architecture/usage/build/platform notes, protocol framing spec in `docs/acp-v0.2.md`.
+- FR-010: Provide complete documentation: Doxygen for all public APIs, `README.md` with architecture/usage/build/platform notes, protocol framing spec in `docs/acp_comm_spec_v0-3.md`.
 - FR-011: Include example applications in `examples/` (e.g., `acp_client.c`, `mock_serial.c`) that demonstrate encoding, session auth, and decoding in a minimal loop.
 - FR-012: Maintain backward-compatible versioning (semver) and a stable `acp_protocol.h` interface.
 - FR-013: Use packed structs and explicit, endian-safe field definitions; wire format is network byte order; add protocol version tags to frames.
