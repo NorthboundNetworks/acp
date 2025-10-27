@@ -9,6 +9,12 @@
 
 This feature delivers a portable, C99 reference implementation of the Autonomous Command Protocol (ACP) with secure framing, authentication, and platform abstractions. The goal is to make it easy for teams to encode, transmit, and verify telemetry and command frames across Linux, macOS, Windows, and embedded systems, with stable headers, clear documentation, and reproducible builds. The result is a small, dependable library that downstream apps can integrate without taking on OS-specific complexity.
 
+## Clarifications
+
+### Session 2025-10-27
+
+- Q: What is the maximum payload size for ACP frames? → A: 1024 bytes
+
 ## User Scenarios & Testing (mandatory)
 
 ### User Story 1 - Encode/Decode Telemetry Frame (Priority: P1)
@@ -70,7 +76,7 @@ Applications can use default logging, time, mutex, and keystore shims on support
 
 ### Edge Cases
 
-- Maximum payload near MTU: frames correctly split or rejected per defined size limits; CRC/HMAC still correct.
+- At 1024-byte payload boundary: frames at or below limit process successfully; larger payloads are rejected with an explicit error; CRC/HMAC still correct for accepted frames.
 - COBS decode errors: invalid zero bytes or malformed runs are detected and reported without buffer overrun.
 - CRC mismatch: decoder rejects frame and surfaces an explicit error code.
 - Replay attempts: duplicate sequence or stale nonce is rejected; counter wrap behavior is defined.
@@ -97,6 +103,7 @@ Applications can use default logging, time, mutex, and keystore shims on support
 - FR-014: Default build avoids dynamic memory allocation; if optional allocation is supported, it must be explicitly opt-in at compile time and fully stub-safe.
 - FR-015: Windows toolchain support targets MinGW for official support in this release; MSVC support may be added in a subsequent release.
 - FR-016: Keystore: default file-based keystore in the user configuration directory; manual key rotation documented for integrators (no automatic rotation in core).
+- FR-017: Payload size limit: maximum payload size is 1024 bytes. Frames exceeding this limit MUST be rejected with an explicit error; segmentation, if needed, is the responsibility of calling applications.
 
 ### Key Entities (data-oriented)
 
@@ -122,5 +129,5 @@ Applications can use default logging, time, mutex, and keystore shims on support
 - A symmetric HMAC key is provisioned via the keystore interface before authenticated sessions are used.
 - Default builds avoid dynamic memory; any optional allocation-based features are off by default.
 - Build systems supported are make and CMake; additional systems may be added later.
-- Windows support targets at least one common toolchain (MinGW or MSVC); precise scope pending clarification.
+- Windows support targets MinGW as the official toolchain for this release; MSVC may be added later.
 - No transport abstraction is provided; calling applications handle serial/TCP/USB I/O.
