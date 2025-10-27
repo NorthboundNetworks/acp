@@ -1,3 +1,25 @@
+/*
+ * Autonomous Command Protocol (ACP)
+ * Reference C Implementation
+ *
+ * Copyright (c) 2025 Northbound Networks
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+ * EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+ * MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
+ * IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
+ * DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR
+ * OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE
+ * OR OTHER DEALINGS IN THE SOFTWARE.
+ */
+
 /**
  * @file acp_nvs.c
  * @brief Non-volatile storage (keystore) implementation for ACP
@@ -52,7 +74,7 @@ typedef struct
     uint32_t reserved;              /**< Reserved for future use */
 } acp_keystore_entry_t;
 
-acp_error_t acp_keystore_init(void)
+acp_result_t acp_keystore_init(void)
 {
     /* Check if keystore file exists, create if not */
     FILE *fp = fopen(ACP_KEYSTORE_PATH, "rb");
@@ -66,7 +88,7 @@ acp_error_t acp_keystore_init(void)
     fp = fopen(ACP_KEYSTORE_PATH, "wb");
     if (fp == NULL)
     {
-        return ACP_ERROR_IO;
+        return ACP_ERR_IO;
     }
 
     /* Write header */
@@ -79,24 +101,24 @@ acp_error_t acp_keystore_init(void)
     if (fwrite(&header, sizeof(header), 1, fp) != 1)
     {
         fclose(fp);
-        return ACP_ERROR_IO;
+        return ACP_ERR_IO;
     }
 
     fclose(fp);
     return ACP_OK;
 }
 
-acp_error_t acp_keystore_get(uint32_t key_id, uint8_t *key_data, size_t key_size)
+acp_result_t acp_keystore_get(uint32_t key_id, uint8_t *key_data, size_t key_size)
 {
     if (key_data == NULL || key_size < ACP_KEY_SIZE)
     {
-        return ACP_ERROR_INVALID_PARAM;
+        return ACP_ERR_INVALID_PARAM;
     }
 
     FILE *fp = fopen(ACP_KEYSTORE_PATH, "rb");
     if (fp == NULL)
     {
-        return ACP_ERROR_NOT_FOUND;
+        return ACP_ERR_KEY_NOT_FOUND;
     }
 
     /* Read header */
@@ -104,14 +126,14 @@ acp_error_t acp_keystore_get(uint32_t key_id, uint8_t *key_data, size_t key_size
     if (fread(&header, sizeof(header), 1, fp) != 1)
     {
         fclose(fp);
-        return ACP_ERROR_IO;
+        return ACP_ERR_IO;
     }
 
     /* Validate header */
     if (header.magic != ACP_KEYSTORE_MAGIC || header.version != ACP_KEYSTORE_VERSION)
     {
         fclose(fp);
-        return ACP_ERROR_INVALID_FORMAT;
+        return ACP_ERR_INVALID_FORMAT;
     }
 
     /* Search for key */
@@ -121,7 +143,7 @@ acp_error_t acp_keystore_get(uint32_t key_id, uint8_t *key_data, size_t key_size
         if (fread(&entry, sizeof(entry), 1, fp) != 1)
         {
             fclose(fp);
-            return ACP_ERROR_IO;
+            return ACP_ERR_IO;
         }
 
         if (entry.key_id == key_id)
@@ -133,18 +155,18 @@ acp_error_t acp_keystore_get(uint32_t key_id, uint8_t *key_data, size_t key_size
     }
 
     fclose(fp);
-    return ACP_ERROR_NOT_FOUND;
+    return ACP_ERR_KEY_NOT_FOUND;
 }
 
-acp_error_t acp_keystore_set(uint32_t key_id, const uint8_t *key_data, size_t key_size)
+acp_result_t acp_keystore_set(uint32_t key_id, const uint8_t *key_data, size_t key_size)
 {
     if (key_data == NULL || key_size != ACP_KEY_SIZE)
     {
-        return ACP_ERROR_INVALID_PARAM;
+        return ACP_ERR_INVALID_PARAM;
     }
 
     /* Initialize keystore if it doesn't exist */
-    acp_error_t result = acp_keystore_init();
+    acp_result_t result = acp_keystore_init();
     if (result != ACP_OK)
     {
         return result;
@@ -153,7 +175,7 @@ acp_error_t acp_keystore_set(uint32_t key_id, const uint8_t *key_data, size_t ke
     FILE *fp = fopen(ACP_KEYSTORE_PATH, "r+b");
     if (fp == NULL)
     {
-        return ACP_ERROR_IO;
+        return ACP_ERR_IO;
     }
 
     /* Read header */
@@ -161,14 +183,14 @@ acp_error_t acp_keystore_set(uint32_t key_id, const uint8_t *key_data, size_t ke
     if (fread(&header, sizeof(header), 1, fp) != 1)
     {
         fclose(fp);
-        return ACP_ERROR_IO;
+        return ACP_ERR_IO;
     }
 
     /* Validate header */
     if (header.magic != ACP_KEYSTORE_MAGIC || header.version != ACP_KEYSTORE_VERSION)
     {
         fclose(fp);
-        return ACP_ERROR_INVALID_FORMAT;
+        return ACP_ERR_INVALID_FORMAT;
     }
 
     /* Search for existing key to update */
@@ -179,7 +201,7 @@ acp_error_t acp_keystore_set(uint32_t key_id, const uint8_t *key_data, size_t ke
         if (fread(&entry, sizeof(entry), 1, fp) != 1)
         {
             fclose(fp);
-            return ACP_ERROR_IO;
+            return ACP_ERR_IO;
         }
 
         if (entry.key_id == key_id)
@@ -190,7 +212,7 @@ acp_error_t acp_keystore_set(uint32_t key_id, const uint8_t *key_data, size_t ke
             if (fwrite(&entry, sizeof(entry), 1, fp) != 1)
             {
                 fclose(fp);
-                return ACP_ERROR_IO;
+                return ACP_ERR_IO;
             }
             fclose(fp);
             return ACP_OK;
@@ -209,7 +231,7 @@ acp_error_t acp_keystore_set(uint32_t key_id, const uint8_t *key_data, size_t ke
     if (fwrite(&entry, sizeof(entry), 1, fp) != 1)
     {
         fclose(fp);
-        return ACP_ERROR_IO;
+        return ACP_ERR_IO;
     }
 
     /* Update header */
@@ -218,21 +240,21 @@ acp_error_t acp_keystore_set(uint32_t key_id, const uint8_t *key_data, size_t ke
     if (fwrite(&header, sizeof(header), 1, fp) != 1)
     {
         fclose(fp);
-        return ACP_ERROR_IO;
+        return ACP_ERR_IO;
     }
 
     fclose(fp);
     return ACP_OK;
 }
 
-acp_error_t acp_keystore_delete(uint32_t key_id)
+acp_result_t acp_keystore_delete(uint32_t key_id)
 {
     /* For simplicity, we don't implement key deletion in this version */
     (void)key_id;
-    return ACP_ERROR_NOT_IMPLEMENTED;
+    return ACP_ERR_NOT_IMPLEMENTED;
 }
 
-acp_error_t acp_keystore_clear(void)
+acp_result_t acp_keystore_clear(void)
 {
     /* Remove the keystore file */
     if (remove(ACP_KEYSTORE_PATH) != 0)
@@ -241,7 +263,7 @@ acp_error_t acp_keystore_clear(void)
         {
             return ACP_OK; /* File doesn't exist, nothing to clear */
         }
-        return ACP_ERROR_IO;
+        return ACP_ERR_IO;
     }
 
     return ACP_OK;

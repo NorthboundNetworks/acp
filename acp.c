@@ -1,3 +1,25 @@
+/*
+ * Autonomous Command Protocol (ACP)
+ * Reference C Implementation
+ *
+ * Copyright (c) 2025 Northbound Networks
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+ * EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+ * MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
+ * IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
+ * DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR
+ * OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE
+ * OR OTHER DEALINGS IN THE SOFTWARE.
+ */
+
 /**
  * @file acp.c
  * @brief ACP core API implementation
@@ -14,6 +36,7 @@
 #include "acp_version.h"
 #include "acp_errors.h"
 #include "acp_crc16.h"
+#include "acp_cobs.h"
 #include <string.h>
 #include <stdio.h>
 
@@ -108,27 +131,59 @@ acp_result_t acp_encode_frame(
         return ACP_ERR_SESSION_NOT_INIT;
     }
 
-    /* TODO: Implement frame encoding */
-    /* This is a stub - actual implementation will be in T021 */
+    /* Construct frame structure */
+    acp_frame_t frame = {0};
+    frame.version = ACP_PROTOCOL_VERSION;
+    frame.type = type;
+    frame.flags = flags;
+    frame.length = (uint16_t)payload_len;
 
-    /* For now, return minimum buffer size estimate */
-    size_t min_size = sizeof(acp_wire_header_t) + payload_len + ACP_CRC16_SIZE;
+    /* Set sequence number for authenticated frames */
     if (flags & ACP_FLAG_AUTHENTICATED)
     {
-        min_size += ACP_HMAC_TAG_LEN;
+        frame.sequence = session->next_sequence;
     }
 
-    /* Add COBS overhead estimate (worst case: ~1% increase + 1 byte) */
-    min_size = min_size + (min_size / 100) + 2;
-
-    if (*output_len < min_size)
+    /* Copy payload */
+    if (payload_len > 0)
     {
-        *output_len = min_size;
-        return ACP_ERR_BUFFER_TOO_SMALL;
+        memcpy(frame.payload, payload, payload_len);
     }
 
-    /* Stub: Just return error for now */
-    return ACP_ERR_NOT_IMPLEMENTED;
+    /* Encode the frame using the framer */
+    size_t frame_size;
+    int result = acp_frame_encode(&frame, output, *output_len, &frame_size);
+    if (result != ACP_OK)
+    {
+        return result;
+    }
+
+    /* For authenticated frames, append HMAC tag */
+    if (flags & ACP_FLAG_AUTHENTICATED)
+    {
+        /* Check if we have space for HMAC tag */
+        if (*output_len < frame_size + ACP_HMAC_TAG_LEN)
+        {
+            *output_len = frame_size + ACP_HMAC_TAG_LEN;
+            return ACP_ERR_BUFFER_TOO_SMALL;
+        }
+
+        /* Calculate HMAC over the encoded frame (excluding delimiters) */
+        uint8_t hmac_tag[32]; /* Full SHA-256 output */
+        acp_hmac_sha256(session->key, ACP_KEY_SIZE,
+                        output + 1, frame_size - 2, /* Skip delimiters */
+                        hmac_tag);
+
+        /* Append truncated HMAC tag after the complete frame */
+        memcpy(output + frame_size, hmac_tag, ACP_HMAC_TAG_LEN);
+        frame_size += ACP_HMAC_TAG_LEN;
+
+        /* Update session sequence number */
+        session->next_sequence++;
+    }
+
+    *output_len = frame_size;
+    return ACP_OK;
 }
 
 /**
@@ -151,102 +206,103 @@ acp_result_t acp_decode_frame(
         return ACP_ERR_NEED_MORE_DATA;
     }
 
-    /* TODO: Implement frame decoding */
-    /* This is a stub - actual implementation will be in T022 */
-
     *consumed = 0;
     memset(frame, 0, sizeof(*frame));
 
-    /* Stub: Just return error for now */
-    return ACP_ERR_NOT_IMPLEMENTED;
+    /* For authenticated frames, we need to handle HMAC verification */
+    /* First, try to find frame boundaries to determine if frame is authenticated */
+
+    /* Find frame start delimiter */
+    if (input[0] != ACP_COBS_DELIMITER)
+    {
+        return ACP_ERR_MALFORMED_FRAME;
+    }
+
+    /* Find frame end delimiter */
+    size_t frame_end = 0;
+    for (size_t i = 1; i < input_len; i++)
+    {
+        if (input[i] == ACP_COBS_DELIMITER)
+        {
+            frame_end = i;
+            break;
+        }
+    }
+
+    if (frame_end == 0)
+    {
+        return ACP_ERR_NEED_MORE_DATA;
+    }
+
+    /* Try to decode the frame without HMAC first to check if it's authenticated */
+    acp_frame_t temp_frame;
+    size_t frame_consumed;
+    int result = acp_frame_decode(input, frame_end + 1, &temp_frame, &frame_consumed);
+    if (result != ACP_OK)
+    {
+        return result;
+    }
+
+    /* If frame is authenticated, verify HMAC */
+    if (temp_frame.flags & ACP_FLAG_AUTHENTICATED)
+    {
+        if (session == NULL || !session->initialized)
+        {
+            return ACP_ERR_SESSION_NOT_INIT;
+        }
+
+        /* Check if we have HMAC tag after the frame */
+        size_t total_size = frame_consumed + ACP_HMAC_TAG_LEN;
+        if (input_len < total_size)
+        {
+            return ACP_ERR_NEED_MORE_DATA;
+        }
+
+        /* Verify HMAC over the encoded frame (excluding delimiters) */
+        uint8_t expected_hmac[32];
+        acp_hmac_sha256(session->key, ACP_KEY_SIZE,
+                        input + 1, frame_consumed - 2, /* Skip delimiters */
+                        expected_hmac);
+
+        /* Compare with received HMAC tag (constant-time) */
+        const uint8_t *received_hmac = input + frame_consumed;
+        if (acp_crypto_memcmp_ct(expected_hmac, received_hmac, ACP_HMAC_TAG_LEN) != 0)
+        {
+            return ACP_ERR_AUTH_FAILED;
+        }
+
+        /* Verify sequence number for replay protection */
+        if (temp_frame.sequence <= session->last_accepted_seq)
+        {
+            return ACP_ERR_REPLAY;
+        }
+
+        /* Update session state */
+        session->last_accepted_seq = temp_frame.sequence;
+        *consumed = total_size;
+    }
+    else
+    {
+        /* Unauthenticated frame */
+        *consumed = frame_consumed;
+
+        /* Enforce authentication policy for command frames */
+        if (acp_frame_requires_auth(temp_frame.type))
+        {
+            return ACP_ERR_AUTH_REQUIRED;
+        }
+    }
+
+    /* Copy the decoded frame */
+    *frame = temp_frame;
+    return ACP_OK;
 }
 
 /* ========================================================================== */
 /*                          Session Management                                */
 /* ========================================================================== */
 
-/**
- * @brief Initialize an ACP session
- */
-acp_result_t acp_session_init(
-    acp_session_t *session,
-    uint32_t key_id,
-    const uint8_t *key,
-    size_t key_len,
-    uint64_t nonce)
-{
-    if (session == NULL || key == NULL)
-    {
-        return ACP_ERR_INVALID_PARAM;
-    }
-    if (key_len == 0 || key_len > sizeof(session->key))
-    {
-        return ACP_ERR_KEY_TOO_SHORT;
-    }
-
-    /* TODO: Full session initialization will be implemented in T029 */
-
-    /* Basic initialization for now */
-    memset(session, 0, sizeof(*session));
-    session->key_id = key_id;
-    memcpy(session->key, key, key_len);
-    session->nonce = nonce;
-    session->next_sequence = 1; /* Start at 1, not 0 */
-    session->last_accepted_seq = 0;
-    session->policy_flags = 0;
-    session->initialized = true;
-
-    return ACP_OK;
-}
-
-/**
- * @brief Rotate session key or nonce
- */
-acp_result_t acp_session_rotate(
-    acp_session_t *session,
-    const uint8_t *new_key,
-    size_t new_key_len,
-    uint64_t new_nonce)
-{
-    if (session == NULL || !session->initialized)
-    {
-        return ACP_ERR_SESSION_NOT_INIT;
-    }
-
-    /* TODO: Full implementation in T029 */
-
-    /* Basic rotation for now */
-    if (new_key != NULL && new_key_len > 0 && new_key_len <= sizeof(session->key))
-    {
-        memcpy(session->key, new_key, new_key_len);
-        if (new_key_len < sizeof(session->key))
-        {
-            memset(&session->key[new_key_len], 0, sizeof(session->key) - new_key_len);
-        }
-    }
-
-    session->nonce = new_nonce;
-    session->next_sequence = 1; /* Reset sequence on rotation */
-    session->last_accepted_seq = 0;
-
-    return ACP_OK;
-}
-
-/**
- * @brief Reset session sequence counters
- */
-acp_result_t acp_session_reset_sequence(acp_session_t *session)
-{
-    if (session == NULL || !session->initialized)
-    {
-        return ACP_ERR_SESSION_NOT_INIT;
-    }
-
-    session->next_sequence = 1;
-    session->last_accepted_seq = 0;
-
-    return ACP_OK;
-}
+/* Session management functions are implemented in acp_session.c */
 
 /* ========================================================================== */
 /*                            Utility Functions                              */

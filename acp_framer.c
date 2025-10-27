@@ -1,3 +1,25 @@
+/*
+ * Autonomous Command Protocol (ACP)
+ * Reference C Implementation
+ *
+ * Copyright (c) 2025 Northbound Networks
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+ * EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+ * MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
+ * IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
+ * DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR
+ * OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE
+ * OR OTHER DEALINGS IN THE SOFTWARE.
+ */
+
 /**
  * @file acp_framer.c
  * @brief ACP frame encoding and decoding implementation
@@ -30,8 +52,9 @@ int acp_frame_encode(const acp_frame_t *frame, uint8_t *output, size_t output_si
 
     *bytes_written = 0;
 
-    /* Calculate total frame size */
-    size_t wire_frame_size = sizeof(acp_wire_header_t) + frame->length + 2; /* +2 for CRC */
+    /* Calculate variable header size based on flags */
+    size_t header_size = acp_wire_header_size(frame->flags);
+    size_t wire_frame_size = header_size + frame->length + 2; /* +2 for CRC */
 
     /* Check if we have space for worst-case COBS encoding */
     size_t max_encoded_size = acp_cobs_max_encoded_size(wire_frame_size) + 2; /* +2 for delimiters */
@@ -49,22 +72,34 @@ int acp_frame_encode(const acp_frame_t *frame, uint8_t *output, size_t output_si
         return ACP_ERR_PAYLOAD_TOO_LARGE;
     }
 
-    /* Create wire header */
-    acp_wire_header_t *header = (acp_wire_header_t *)wire_frame;
-    header->version = frame->version;
-    header->type = frame->type;
-    header->flags = frame->flags;
-    header->reserved = 0;
-    header->length = frame->length; /* Host byte order for now */
-    header->sequence = frame->sequence;
+    /* Create base wire header */
+    acp_wire_header_base_t *base_header = (acp_wire_header_base_t *)wire_frame;
+    base_header->version = frame->version;
+    base_header->type = frame->type;
+    base_header->flags = frame->flags;
+    base_header->reserved = 0;
+    base_header->length = frame->length; /* Host byte order for now */
 
     /* Convert length to network byte order */
-    header->length = ((header->length & 0xFF) << 8) | ((header->length >> 8) & 0xFF);
+    base_header->length = ((base_header->length & 0xFF) << 8) | ((base_header->length >> 8) & 0xFF);
+
+    /* Add conditional sequence field if authenticated */
+    uint8_t *payload_start = wire_frame + sizeof(acp_wire_header_base_t);
+    if (frame->flags & ACP_FLAG_AUTHENTICATED)
+    {
+        /* Add sequence number in network byte order */
+        uint32_t seq_be = ((frame->sequence & 0xFF) << 24) |
+                          (((frame->sequence >> 8) & 0xFF) << 16) |
+                          (((frame->sequence >> 16) & 0xFF) << 8) |
+                          ((frame->sequence >> 24) & 0xFF);
+        memcpy(payload_start, &seq_be, sizeof(uint32_t));
+        payload_start += sizeof(uint32_t);
+    }
 
     /* Copy payload */
-    if (frame->length > 0 && frame->payload)
+    if (frame->length > 0)
     {
-        memcpy(wire_frame + sizeof(acp_wire_header_t), frame->payload, frame->length);
+        memcpy(payload_start, frame->payload, frame->length);
     }
 
     /* Calculate and append CRC16 */
@@ -102,9 +137,9 @@ int acp_frame_decode(const uint8_t *input, size_t input_size, acp_frame_t *frame
 
     *bytes_consumed = 0;
 
-    /* Need at least minimum frame size */
-    if (input_size < sizeof(acp_wire_header_t) + 2 + 2)
-    { /* header + CRC + delimiters */
+    /* Need at least minimum frame size (base header + CRC + delimiters) */
+    if (input_size < sizeof(acp_wire_header_base_t) + 2 + 2)
+    { /* base header + CRC + delimiters */
         return ACP_ERR_NEED_MORE_DATA;
     }
 
@@ -141,10 +176,24 @@ int acp_frame_decode(const uint8_t *input, size_t input_size, acp_frame_t *frame
         return result;
     }
 
-    /* Need at least header + CRC */
-    if (decoded_len < sizeof(acp_wire_header_t) + 2)
+    /* Need at least base header + CRC */
+    if (decoded_len < sizeof(acp_wire_header_base_t) + 2)
     {
         ACP_LOG_WARN("Decoded frame too short: %zu bytes", decoded_len);
+        return ACP_ERR_MALFORMED_FRAME;
+    }
+
+    /* Parse base wire header */
+    const acp_wire_header_base_t *base_header = (const acp_wire_header_base_t *)decoded_frame;
+
+    /* Calculate expected header size based on flags */
+    size_t expected_header_size = acp_wire_header_size(base_header->flags);
+
+    /* Verify we have enough data for the full header */
+    if (decoded_len < expected_header_size + 2)
+    {
+        ACP_LOG_WARN("Decoded frame too short for header: need %zu+2, have %zu",
+                     expected_header_size, decoded_len);
         return ACP_ERR_MALFORMED_FRAME;
     }
 
@@ -158,26 +207,38 @@ int acp_frame_decode(const uint8_t *input, size_t input_size, acp_frame_t *frame
         return ACP_ERR_CRC_MISMATCH;
     }
 
-    /* Parse wire header */
-    const acp_wire_header_t *header = (const acp_wire_header_t *)decoded_frame;
-
     /* Convert length from network byte order */
-    uint16_t payload_len = ((header->length & 0xFF) << 8) | ((header->length >> 8) & 0xFF);
+    uint16_t payload_len = ((base_header->length & 0xFF) << 8) | ((base_header->length >> 8) & 0xFF);
 
     /* Verify frame size consistency */
-    if (sizeof(acp_wire_header_t) + payload_len + 2 != decoded_len)
+    if (expected_header_size + payload_len + 2 != decoded_len)
     {
-        ACP_LOG_ERROR("Frame size mismatch: header says %u+%zu+2, got %zu",
-                      (unsigned)sizeof(acp_wire_header_t), (size_t)payload_len, decoded_len);
+        ACP_LOG_ERROR("Frame size mismatch: header says %zu+%u+2, got %zu",
+                      expected_header_size, payload_len, decoded_len);
         return ACP_ERR_MALFORMED_FRAME;
     }
 
     /* Fill in frame structure */
-    frame->version = header->version;
-    frame->type = header->type;
-    frame->flags = header->flags;
-    frame->sequence = header->sequence;
+    frame->version = base_header->version;
+    frame->type = base_header->type;
+    frame->flags = base_header->flags;
     frame->length = payload_len;
+
+    /* Parse conditional sequence field */
+    uint32_t sequence = 0;
+    const uint8_t *payload_start = decoded_frame + sizeof(acp_wire_header_base_t);
+    if (base_header->flags & ACP_FLAG_AUTHENTICATED)
+    {
+        /* Extract sequence number from network byte order */
+        uint32_t seq_be;
+        memcpy(&seq_be, payload_start, sizeof(uint32_t));
+        sequence = ((seq_be & 0xFF) << 24) |
+                   (((seq_be >> 8) & 0xFF) << 16) |
+                   (((seq_be >> 16) & 0xFF) << 8) |
+                   ((seq_be >> 24) & 0xFF);
+        payload_start += sizeof(uint32_t);
+    }
+    frame->sequence = sequence;
 
     /* Copy payload if present */
     if (payload_len > 0)
@@ -187,7 +248,7 @@ int acp_frame_decode(const uint8_t *input, size_t input_size, acp_frame_t *frame
             ACP_LOG_ERROR("Payload too large: %u bytes", payload_len);
             return ACP_ERR_PAYLOAD_TOO_LARGE;
         }
-        memcpy(frame->payload, decoded_frame + sizeof(acp_wire_header_t), payload_len);
+        memcpy(frame->payload, payload_start, payload_len);
     }
 
     *bytes_consumed = frame_end + 1;
@@ -205,8 +266,9 @@ size_t acp_frame_encoded_size(const acp_frame_t *frame)
         return 0;
     }
 
-    size_t wire_size = sizeof(acp_wire_header_t) + frame->length + 2; /* +2 for CRC */
-    return acp_cobs_max_encoded_size(wire_size) + 2;                  /* +2 for delimiters */
+    size_t header_size = acp_wire_header_size(frame->flags);
+    size_t wire_size = header_size + frame->length + 2; /* +2 for CRC */
+    return acp_cobs_max_encoded_size(wire_size) + 2;    /* +2 for delimiters */
 }
 
 /* ========================================================================== */

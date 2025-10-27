@@ -58,10 +58,13 @@ extern "C"
 /** @brief Maximum frame size including all overhead */
 #define ACP_MAX_FRAME_SIZE (ACP_MAX_PAYLOAD_SIZE + 64)
 
-/** @brief HMAC tag length (truncated SHA-256) */
+/** @brief HMAC tag length (truncated to 16 bytes) */
 #define ACP_HMAC_TAG_LEN 16
 
-/** @brief CRC16 size in bytes */
+/** @brief Key size for HMAC-SHA256 (32 bytes) */
+#define ACP_KEY_SIZE 32
+
+/** @brief CRC16 checksum size in bytes */
 #define ACP_CRC16_SIZE 2
 
 /** @brief COBS delimiter byte */
@@ -108,10 +111,25 @@ extern "C"
     /* ========================================================================== */
 
     /**
-     * @brief ACP wire header structure (network byte order)
+     * @brief Base wire frame header structure (always present)
      *
-     * This structure represents the fixed header portion of all ACP frames
-     * as they appear on the wire (after COBS encoding).
+     * This structure represents the fixed portion of all ACP frames.
+     * Additional fields may follow based on flags.
+     */
+    typedef struct __attribute__((packed))
+    {
+        uint8_t version;  /**< Protocol version (ACP_PROTOCOL_VERSION_MAJOR) */
+        uint8_t type;     /**< Frame type (acp_frame_type_t) */
+        uint8_t flags;    /**< Frame flags (ACP_FLAG_*) */
+        uint8_t reserved; /**< Reserved byte (must be 0 in v0.3) */
+        uint16_t length;  /**< Payload length in bytes (0-1024) */
+    } acp_wire_header_base_t;
+
+    /**
+     * @brief Full wire frame header structure (deprecated - use base + sequence conditionally)
+     *
+     * This structure represents the full header when ACP_FLAG_AUTHENTICATED is set.
+     * For backward compatibility only.
      */
     typedef struct __attribute__((packed))
     {
@@ -123,9 +141,27 @@ extern "C"
         uint32_t sequence; /**< Sequence number (only if ACP_FLAG_AUTHENTICATED set) */
     } acp_wire_header_t;
 
-/* Static assertion to ensure wire header packing */
+/* Static assertions to ensure wire header packing */
 #define ACP_STATIC_ASSERT(cond, msg) typedef char acp_static_assert_##__LINE__[(cond) ? 1 : -1]
-    ACP_STATIC_ASSERT(sizeof(acp_wire_header_t) == 10, "Wire header must be exactly 10 bytes"); /* ========================================================================== */
+    ACP_STATIC_ASSERT(sizeof(acp_wire_header_base_t) == 6, "Base wire header must be exactly 6 bytes");
+
+#define ACP_STATIC_ASSERT2(cond, msg) typedef char acp_static_assert2_##__LINE__[(cond) ? 1 : -1]
+    ACP_STATIC_ASSERT2(sizeof(acp_wire_header_t) == 10, "Full wire header must be exactly 10 bytes");
+
+    /**
+     * @brief Calculate wire header size based on flags
+     * @param flags Frame flags to determine header size
+     * @return Size of wire header in bytes
+     */
+    static inline size_t acp_wire_header_size(uint8_t flags)
+    {
+        size_t size = sizeof(acp_wire_header_base_t);
+        if (flags & ACP_FLAG_AUTHENTICATED)
+        {
+            size += sizeof(uint32_t); /* Add sequence field */
+        }
+        return size;
+    } /* ========================================================================== */
     /*                            Host Structures                                 */
     /* ========================================================================== */
 
@@ -200,6 +236,8 @@ extern "C"
         ACP_ERR_REPLAY_ATTACK = -42,    /**< Replay attack detected (alias) */
 
         /* System errors */
+        ACP_ERR_IO = -80,              /**< Input/output error */
+        ACP_ERR_INVALID_FORMAT = -81,  /**< Invalid file/data format */
         ACP_ERR_NOT_IMPLEMENTED = -90, /**< Feature not implemented */
         ACP_ERR_INTERNAL = -99         /**< Internal error */
     } acp_result_t;
@@ -383,6 +421,34 @@ extern "C"
      * @return Host byte order value
      */
     uint32_t acp_ntohl(uint32_t net_val);
+
+    /* ========================================================================== */
+    /*                         Cryptographic Functions                           */
+    /* ========================================================================== */
+
+    /**
+     * @brief Compute HMAC-SHA256
+     *
+     * @param[in]  key        HMAC key material
+     * @param[in]  key_len    Length of key in bytes
+     * @param[in]  data       Data to authenticate
+     * @param[in]  data_len   Length of data in bytes
+     * @param[out] mac        Output buffer for MAC (32 bytes)
+     */
+    void acp_hmac_sha256(const uint8_t *key, size_t key_len,
+                         const uint8_t *data, size_t data_len,
+                         uint8_t *mac);
+
+    /**
+     * @brief Constant-time memory comparison for cryptographic operations
+     *
+     * @param[in] a     First buffer
+     * @param[in] b     Second buffer
+     * @param[in] len   Length to compare
+     *
+     * @return 0 if equal, non-zero if different
+     */
+    int acp_crypto_memcmp_ct(const void *a, const void *b, size_t len);
 
     /* ========================================================================== */
     /*                         Frame Processing Functions                         */

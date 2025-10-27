@@ -29,7 +29,7 @@ This tasks file is organized by phases and user stories. Tasks are immediately e
 - [X] T015 Implement COBS encode/decode scaffolding in /Users/paulzanna/Github/acp/acp_framer.c
 - [◐] T016 Implement HMAC-SHA256 (portable) in /Users/paulzanna/Github/acp/acp_crypto.c (stub implementation working, full implementation in progress)
 - [X] T017 Implement session state and replay tracking in /Users/paulzanna/Github/acp/acp_session.c
-- [ ] T018 Implement default file-based keystore in /Users/paulzanna/Github/acp/acp_nvs.c
+- [X] T018 Implement default file-based keystore in /Users/paulzanna/Github/acp/acp_nvs.c
 - [ ] T020 [P] Provide Windows (MinGW) shim fallback in /Users/paulzanna/Github/acp/acp_platform_windows.c
 - [X] T062 [Core] Add wire header struct with explicit packing and static asserts in /Users/paulzanna/Github/acp/acp_protocol.h
 - [X] T063 [Core] Implement host↔network helpers (u16/u32) and use them consistently in /Users/paulzanna/Github/acp/acp_framer.c
@@ -70,17 +70,17 @@ Independent Test Criteria:
 Tasks:
 
 - [X] T029 [US2] Implement session init/rotate APIs in /Users/paulzanna/Github/acp/acp_session.c
-- [ ] T030 [US2] Add seq handling and conditional header fields in /Users/paulzanna/Github/acp/acp_framer.c
-- [ ] T031 [P] [US2] Implement HMAC compute function in /Users/paulzanna/Github/acp/acp_crypto.c
-- [ ] T032 [P] [US2] Implement constant-time tag compare in /Users/paulzanna/Github/acp/acp_crypto.c
-- [ ] T033 [US2] Integrate HMAC into acp_encode_frame/acp_decode_frame in /Users/paulzanna/Github/acp/acp.c
+- [X] T030 [US2] Add seq handling and conditional header fields in /Users/paulzanna/Github/acp/acp_framer.c
+- [X] T031 [P] [US2] Implement HMAC compute function in /Users/paulzanna/Github/acp/acp_crypto.c
+- [X] T032 [P] [US2] Implement constant-time tag compare in /Users/paulzanna/Github/acp/acp_crypto.c
+- [X] T033 [US2] Integrate HMAC into acp_encode_frame/acp_decode_frame in /Users/paulzanna/Github/acp/acp.c
 - [ ] T034 [US2] Add HMAC test vectors in /Users/paulzanna/Github/acp/tests/hmac_test.c
 - [ ] T035 [P] [US2] Add replay rejection tests in /Users/paulzanna/Github/acp/tests/replay_test.c
 - [ ] T036 [US2] Implement default keystore get_key() in /Users/paulzanna/Github/acp/acp_nvs.c
 - [ ] T051 [US2] Enforce command-frame auth in decoder: reject unauthenticated command frames in /Users/paulzanna/Github/acp/acp.c
 - [ ] T052 [US2] Add test: unauthenticated command frame is rejected in /Users/paulzanna/Github/acp/tests/command_auth_reject_test.c
 - [ ] T053 [US2] Add test: incorrect HMAC tag (16-byte truncated) is rejected in /Users/paulzanna/Github/acp/tests/command_auth_bad_tag_test.c
-- [ ] T054 [US2] Define HMAC truncation length constant (ACP_HMAC_TAG_LEN=16) in /Users/paulzanna/Github/acp/acp_protocol.h
+- [X] T054 [US2] Define HMAC truncation length constant (ACP_HMAC_TAG_LEN=16) in /Users/paulzanna/Github/acp/acp_protocol.h
 - [ ] T055 [US2] Update encoder/decoder to use ACP_HMAC_TAG_LEN for tag length in /Users/paulzanna/Github/acp/acp.c
 - [ ] T056 [US2] Add test vectors including 16-byte truncated tags in /Users/paulzanna/Github/acp/tests/hmac_test.c
 
