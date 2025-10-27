@@ -1,0 +1,21 @@
+# PKG-CONFIG template for ACP library
+# This file gets configured by CMake during the build process
+
+prefix=@CMAKE_INSTALL_PREFIX@
+exec_prefix=${prefix}
+libdir=@CMAKE_INSTALL_FULL_LIBDIR@
+includedir=@CMAKE_INSTALL_FULL_INCLUDEDIR@
+
+Name: @PROJECT_NAME@
+Description: @PROJECT_DESCRIPTION@
+Version: @PROJECT_VERSION@
+URL: https://github.com/pzanna/acp
+
+Libs: -L${libdir} -lacp
+Libs.private: @ACP_PRIVATE_LIBS@
+Cflags: -I${includedir}
+
+# Features
+no_heap=@ACP_NO_HEAP@
+build_shared=@ACP_BUILD_SHARED@
+build_static=@ACP_BUILD_STATIC@

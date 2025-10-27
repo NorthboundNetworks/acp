@@ -89,3 +89,4 @@ acp_keystore.bin
 *.legacy
 *.backup
 *_stub.c
+/build_test

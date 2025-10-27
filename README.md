@@ -35,33 +35,47 @@ This repository contains the reference C implementation with platform shims, tes
 
 Note: Build system files (Makefile, CMakeLists.txt) and example sources are planned in tasks and may not exist yet on this branch.
 
-## Build (planned targets)
+## Build
 
-Two build systems will be supported:
+ACP supports both CMake and Make build systems with full cross-platform support:
 
-- Make: builds static and shared libraries on Linux/macOS; static on Windows (MinGW)
-- CMake: portable configuration, install targets, and example builds
+### Quick Start
 
-Artifacts:
-
-- Linux/macOS: libacp.a and libacp.so/.dylib
-- Windows (MinGW): static library for this release
-
-Configuration flags:
-
-- ACP_NO_HEAP=ON by default: disallow malloc/calloc/realloc/free in core paths
-- Optional feature flags to enable heap-dependent paths explicitly
-
-After T001/T002 are implemented, typical flows:
-
-```sh
-# Using Make (once Makefile is added)
-make
-
-# Using CMake (once CMakeLists.txt is added)
-cmake -S . -B build -DCMAKE_BUILD_TYPE=Release -DACP_NO_HEAP=ON
-cmake --build build --config Release
+**CMake (Recommended):**
+```bash
+mkdir build && cd build
+cmake .. -DCMAKE_BUILD_TYPE=Release
+cmake --build . --parallel
 ```
+
+**Make:**
+```bash
+make all
+```
+
+### Supported Platforms & Artifacts
+
+- **Linux/macOS**: `libacp.a` (static) and `libacp.so/.dylib` (shared)
+- **Windows (MinGW)**: `libacp.a` (static library)
+
+### Build Options
+
+- `ACP_NO_HEAP=ON` (default): Embedded-friendly, no heap allocation
+- `ACP_BUILD_SHARED=ON`: Build shared libraries (Linux/macOS)
+- `ACP_BUILD_TESTS=ON`: Build test suite
+- `ACP_BUILD_EXAMPLES=ON`: Build example programs
+
+### Installation
+
+```bash
+# CMake
+cmake --install . --prefix /usr/local
+
+# Make
+make install PREFIX=/usr/local
+```
+
+**For detailed build instructions, cross-compilation, and troubleshooting, see [BUILD.md](docs/BUILD.md).**
 
 ## Security policy (command vs telemetry)
 
@@ -97,15 +111,16 @@ The public API header `acp_protocol.h` and versioning header will be introduced 
 
 | Platform | Compiler | Static Lib | Shared Lib | CI Status |
 |----------|----------|------------|------------|-----------|
-| Linux x64 | GCC 9+ | ✓ | ✓ | ![Build Status](https://github.com/pzanna/acp/workflows/Build%20and%20Test/badge.svg) |
-| Linux x64 | Clang 10+ | ✓ | ✓ | ![Build Status](https://github.com/pzanna/acp/workflows/Build%20and%20Test/badge.svg) |
-| macOS x64 | Clang (Xcode) | ✓ | ✓ | ![Build Status](https://github.com/pzanna/acp/workflows/Build%20and%20Test/badge.svg) |
-| Windows x64 | MinGW-w64 | ✓ | ⚠️ Deferred | ![Build Status](https://github.com/pzanna/acp/workflows/Build%20and%20Test/badge.svg) |
+| Linux x64 | GCC 9+ | ✅ | ✅ | [![Build Status](https://github.com/pzanna/acp/workflows/Build%20and%20Test/badge.svg)](https://github.com/pzanna/acp/actions) |
+| Linux x64 | Clang 10+ | ✅ | ✅ | [![Build Status](https://github.com/pzanna/acp/workflows/Build%20and%20Test/badge.svg)](https://github.com/pzanna/acp/actions) |
+| macOS (Intel/M1) | Clang (Xcode) | ✅ | ✅ | [![Build Status](https://github.com/pzanna/acp/workflows/Build%20and%20Test/badge.svg)](https://github.com/pzanna/acp/actions) |
+| Windows x64 | MinGW-w64 | ✅ | ⚠️ v0.4+ | [![Build Status](https://github.com/pzanna/acp/workflows/Build%20and%20Test/badge.svg)](https://github.com/pzanna/acp/actions) |
 | Windows x64 | MSVC | ⚠️ v0.4+ | ⚠️ v0.4+ | Not supported in v0.3 |
+| ARM64 Linux | GCC/Clang | ✅ | ✅ | Cross-compilation tested |
+| ARM Embedded | arm-none-eabi-gcc | ✅ | N/A | Cross-compilation support |
 
 **Legend:**
-
-- ✓ Supported and tested in CI
+- ✅ Fully supported and tested
 - ⚠️ Planned for future release  
 - ❌ Not supported
 

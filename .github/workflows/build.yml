@@ -13,6 +13,13 @@ jobs:
       matrix:
         compiler: [gcc, clang]
         build_type: [Debug, Release]
+        arch: [x64]
+        include:
+          # Test additional architectures
+          - compiler: gcc
+            build_type: Release  
+            arch: x64
+            extra_tests: true
     
     steps:
     - uses: actions/checkout@v4
@@ -126,6 +133,44 @@ jobs:
         cd build
         ctest --output-on-failure --verbose
 
+  feature-validation:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+        compiler: [gcc, clang]
+        exclude:
+          - os: macos-latest
+            compiler: gcc # Use system clang on macOS
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Install dependencies (Linux)
+      if: runner.os == 'Linux'
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y build-essential cmake
+    
+    - name: Install dependencies (macOS)
+      if: runner.os == 'macOS'
+      run: brew install cmake
+    
+    - name: Build feature test
+      run: |
+        ${{ matrix.compiler }} -std=c99 -Wall -Wextra -I. \
+          tests/acp_feature_test.c acp_crypto.c acp_crc16.c \
+          -o feature_test
+    
+    - name: Run feature validation
+      run: ./feature_test
+    
+    - name: Test cross-platform Makefile
+      run: |
+        make clean || true
+        make static CC=${{ matrix.compiler }}
+        make pkg-config
+
   static-analysis:
     runs-on: ubuntu-latest
     
@@ -158,33 +203,109 @@ jobs:
                    *.c -- -std=c99
 
   package-artifacts:
-    needs: [build-linux, build-macos, build-windows-mingw]
-    runs-on: ubuntu-latest
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    needs: [build-linux, build-macos, build-windows-mingw, feature-validation]
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        include:
+          - os: ubuntu-latest
+            platform: linux-x64
+            cmake_generator: "Unix Makefiles"
+          - os: macos-latest  
+            platform: macos-x64
+            cmake_generator: "Unix Makefiles"
+          - os: windows-latest
+            platform: windows-x64
+            cmake_generator: "MinGW Makefiles"
+    if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/'))
     
     steps:
     - uses: actions/checkout@v4
     
-    - name: Build release artifacts
+    - name: Setup MinGW (Windows)
+      if: runner.os == 'Windows'
+      uses: msys2/setup-msys2@v2
+      with:
+        msystem: MINGW64
+        install: mingw-w64-x86_64-gcc mingw-w64-x86_64-cmake
+    
+    - name: Install dependencies (Linux)
+      if: runner.os == 'Linux'
+      run: sudo apt-get update && sudo apt-get install -y cmake
+    
+    - name: Install dependencies (macOS)
+      if: runner.os == 'macOS'
+      run: brew install cmake
+    
+    - name: Build release libraries (Unix)
+      if: matrix.os != 'windows-latest'
       run: |
-        # Linux x64
-        mkdir -p artifacts/linux-x64
-        cmake -B build-linux -DCMAKE_BUILD_TYPE=Release
-        cmake --build build-linux
-        cp build-linux/libacp.a artifacts/linux-x64/
-        cp build-linux/libacp.so artifacts/linux-x64/
+        mkdir build-release
+        cd build-release
+        cmake .. -G "${{ matrix.cmake_generator }}" \
+                 -DCMAKE_BUILD_TYPE=Release \
+                 -DACP_BUILD_TESTS=OFF \
+                 -DACP_BUILD_EXAMPLES=OFF
+        cmake --build . --parallel
+    
+    - name: Build release libraries (Windows)
+      if: matrix.os == 'windows-latest'
+      shell: msys2 {0}
+      run: |
+        mkdir build-release
+        cd build-release
+        cmake .. -G "${{ matrix.cmake_generator }}" \
+                 -DCMAKE_BUILD_TYPE=Release \
+                 -DACP_BUILD_TESTS=OFF \
+                 -DACP_BUILD_EXAMPLES=OFF
+        cmake --build . --parallel
+    
+    - name: Package artifacts (Unix)
+      if: matrix.os != 'windows-latest'
+      run: |
+        mkdir -p artifacts/${{ matrix.platform }}/lib
+        mkdir -p artifacts/${{ matrix.platform }}/include
+        mkdir -p artifacts/${{ matrix.platform }}/pkgconfig
         
-        # Package headers
-        mkdir -p artifacts/include
-        cp acp_*.h artifacts/include/
+        # Copy libraries
+        cp build-release/libacp.a artifacts/${{ matrix.platform }}/lib/
+        cp build-release/libacp.* artifacts/${{ matrix.platform }}/lib/ || true
         
-        # Create tarball
-        tar -czf acp-v0.3.0-linux-x64.tar.gz -C artifacts .
+        # Copy headers
+        cp acp_*.h artifacts/${{ matrix.platform }}/include/
+        
+        # Generate pkg-config file
+        make pkg-config PREFIX=/usr/local
+        cp build/acp.pc artifacts/${{ matrix.platform }}/pkgconfig/
+        
+        # Create archive
+        tar -czf acp-v0.3.0-${{ matrix.platform }}.tar.gz -C artifacts ${{ matrix.platform }}/
+    
+    - name: Package artifacts (Windows)
+      if: matrix.os == 'windows-latest'
+      shell: msys2 {0}
+      run: |
+        mkdir -p artifacts/${{ matrix.platform }}/lib
+        mkdir -p artifacts/${{ matrix.platform }}/include
+        mkdir -p artifacts/${{ matrix.platform }}/pkgconfig
+        
+        # Copy libraries
+        cp build-release/libacp.a artifacts/${{ matrix.platform }}/lib/
+        
+        # Copy headers
+        cp acp_*.h artifacts/${{ matrix.platform }}/include/
+        
+        # Generate pkg-config file
+        make pkg-config PREFIX=/usr/local
+        cp build/acp.pc artifacts/${{ matrix.platform }}/pkgconfig/
+        
+        # Create archive
+        cd artifacts && zip -r ../acp-v0.3.0-${{ matrix.platform }}.zip ${{ matrix.platform }}/
     
     - name: Upload artifacts
       uses: actions/upload-artifact@v4
       with:
-        name: acp-libraries
+        name: acp-${{ matrix.platform }}
         path: |
-          *.tar.gz
+          acp-v0.3.0-${{ matrix.platform }}.*
           artifacts/

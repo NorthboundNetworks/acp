@@ -51,6 +51,7 @@ function(add_acp_test test_name test_source)
 endfunction()
 
 # Add tests as they become available
+add_acp_test(acp_feature_test acp_feature_test.c)
 add_acp_test(byte_order_test byte_order_test.c)
 add_acp_test(crc16_test crc16_test.c)
 add_acp_test(cobs_test cobs_test.c)
