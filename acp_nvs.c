@@ -268,3 +268,39 @@ acp_result_t acp_keystore_clear(void)
 
     return ACP_OK;
 }
+
+/**
+ * @brief Initialize session with key from keystore
+ *
+ * This is the "default keystore get_key()" function that automatically
+ * retrieves the key material from the keystore based on key_id.
+ *
+ * @param[out] session   Session to initialize
+ * @param[in]  key_id    Key identifier to look up
+ * @param[in]  nonce     Session nonce
+ *
+ * @return ACP_OK on success, error code on failure
+ */
+acp_result_t acp_keystore_init_session(acp_session_t *session, uint32_t key_id, uint64_t nonce)
+{
+    if (session == NULL)
+    {
+        return ACP_ERR_INVALID_PARAM;
+    }
+
+    /* Retrieve key from keystore */
+    uint8_t key_data[ACP_KEY_SIZE];
+    acp_result_t result = acp_keystore_get(key_id, key_data, sizeof(key_data));
+    if (result != ACP_OK)
+    {
+        return result;
+    }
+
+    /* Initialize session with retrieved key */
+    result = acp_session_init(session, key_id, key_data, ACP_KEY_SIZE, nonce);
+
+    /* Clear sensitive data from stack */
+    memset(key_data, 0, sizeof(key_data));
+
+    return result;
+}

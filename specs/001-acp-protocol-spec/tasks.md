@@ -74,14 +74,14 @@ Tasks:
 - [X] T031 [P] [US2] Implement HMAC compute function in /Users/paulzanna/Github/acp/acp_crypto.c
 - [X] T032 [P] [US2] Implement constant-time tag compare in /Users/paulzanna/Github/acp/acp_crypto.c
 - [X] T033 [US2] Integrate HMAC into acp_encode_frame/acp_decode_frame in /Users/paulzanna/Github/acp/acp.c
-- [ ] T034 [US2] Add HMAC test vectors in /Users/paulzanna/Github/acp/tests/hmac_test.c
-- [ ] T035 [P] [US2] Add replay rejection tests in /Users/paulzanna/Github/acp/tests/replay_test.c
-- [ ] T036 [US2] Implement default keystore get_key() in /Users/paulzanna/Github/acp/acp_nvs.c
-- [ ] T051 [US2] Enforce command-frame auth in decoder: reject unauthenticated command frames in /Users/paulzanna/Github/acp/acp.c
-- [ ] T052 [US2] Add test: unauthenticated command frame is rejected in /Users/paulzanna/Github/acp/tests/command_auth_reject_test.c
-- [ ] T053 [US2] Add test: incorrect HMAC tag (16-byte truncated) is rejected in /Users/paulzanna/Github/acp/tests/command_auth_bad_tag_test.c
+- [X] T034 [US2] Add HMAC test vectors in /Users/paulzanna/Github/acp/tests/hmac_test.c
+- [X] T035 [P] [US2] Add replay rejection tests in /Users/paulzanna/Github/acp/tests/replay_test.c
+- [X] T036 [US2] Implement default keystore get_key() in /Users/paulzanna/Github/acp/acp_nvs.c
+- [X] T051 [US2] Enforce command-frame auth in decoder: reject unauthenticated command frames in /Users/paulzanna/Github/acp/acp.c
+- [X] T052 [US2] Add test: unauthenticated command frame is rejected in /Users/paulzanna/Github/acp/tests/command_auth_reject_test.c
+- [X] T053 [US2] Add test: incorrect HMAC tag (16-byte truncated) is rejected in /Users/paulzanna/Github/acp/tests/command_auth_bad_tag_test.c
 - [X] T054 [US2] Define HMAC truncation length constant (ACP_HMAC_TAG_LEN=16) in /Users/paulzanna/Github/acp/acp_protocol.h
-- [ ] T055 [US2] Update encoder/decoder to use ACP_HMAC_TAG_LEN for tag length in /Users/paulzanna/Github/acp/acp.c
+- [X] T055 [US2] Update encoder/decoder to use ACP_HMAC_TAG_LEN for tag length in /Users/paulzanna/Github/acp/acp.c
 - [ ] T056 [US2] Add test vectors including 16-byte truncated tags in /Users/paulzanna/Github/acp/tests/hmac_test.c
 
 ## Phase 5 — User Story 3 (P2): Cross-Platform Build and Link

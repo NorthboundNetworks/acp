@@ -355,6 +355,62 @@ extern "C"
      */
     acp_result_t acp_session_reset_sequence(acp_session_t *session);
 
+    /**
+     * @brief Initialize session with key from keystore
+     *
+     * Convenience function that automatically retrieves key material from
+     * the keystore and initializes a session.
+     *
+     * @param[out] session Session to initialize
+     * @param[in]  key_id  Key identifier to look up in keystore
+     * @param[in]  nonce   Session nonce
+     *
+     * @return ACP_OK on success, ACP_ERR_KEY_NOT_FOUND if key not found,
+     *         other error codes on failure
+     */
+    acp_result_t acp_keystore_init_session(acp_session_t *session, uint32_t key_id, uint64_t nonce);
+
+    /* ========================================================================== */
+    /*                         Keystore Functions                                */
+    /* ========================================================================== */
+
+    /**
+     * @brief Initialize keystore
+     *
+     * @return ACP_OK on success, error code on failure
+     */
+    acp_result_t acp_keystore_init(void);
+
+    /**
+     * @brief Get key from keystore
+     *
+     * @param[in]  key_id    Key identifier
+     * @param[out] key_data  Buffer to receive key data
+     * @param[in]  key_size  Size of key buffer (must be >= ACP_KEY_SIZE)
+     *
+     * @return ACP_OK on success, ACP_ERR_KEY_NOT_FOUND if not found,
+     *         other error codes on failure
+     */
+    acp_result_t acp_keystore_get(uint32_t key_id, uint8_t *key_data, size_t key_size);
+
+    /**
+     * @brief Set key in keystore
+     *
+     * @param[in] key_id    Key identifier
+     * @param[in] key_data  Key data to store
+     * @param[in] key_size  Size of key data (must be ACP_KEY_SIZE)
+     *
+     * @return ACP_OK on success, error code on failure
+     */
+    acp_result_t acp_keystore_set(uint32_t key_id, const uint8_t *key_data, size_t key_size);
+
+    /**
+     * @brief Clear all keys from keystore
+     *
+     * @return ACP_OK on success, error code on failure
+     */
+    acp_result_t acp_keystore_clear(void);
+
     /* ========================================================================== */
     /*                            Utility Functions                              */
     /* ========================================================================== */
@@ -449,6 +505,13 @@ extern "C"
      * @return 0 if equal, non-zero if different
      */
     int acp_crypto_memcmp_ct(const void *a, const void *b, size_t len);
+
+    /**
+     * @brief Run comprehensive crypto self-tests
+     *
+     * @return ACP_OK if all tests pass, error code on failure
+     */
+    int acp_crypto_self_test(void);
 
     /* ========================================================================== */
     /*                         Frame Processing Functions                         */
