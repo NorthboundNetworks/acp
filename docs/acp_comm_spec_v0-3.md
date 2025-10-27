@@ -1,193 +1,290 @@
-# Autonomous Command Protocol v0.3 — Specification
+# Autonomous Command Protocol (ACP) v0.3 — Complete Specification
 
-## Purpose
+## Executive Summary
 
-Define a secure, auditable, and robust binary communication protocol for command and telemetry exchange between embedded devices, control stations, or companion systems. ACP provides a lightweight and resilient data layer for any autonomous or remotely operated platform, supporting authentication, replay protection, and efficient framing across serial, USB, or network transports.
+The Autonomous Command Protocol (ACP) v0.3 is a secure, lightweight binary communication protocol designed for embedded systems, IoT devices, and distributed applications. ACP provides authenticated message exchange with integrity validation, replay protection, and efficient framing suitable for resource-constrained environments.
 
----
+## Design Principles
 
-## Goals
+- **Security First**: HMAC-SHA256 authentication with constant-time verification
+- **Embedded Ready**: Zero-heap operation by default, minimal resource requirements  
+- **Platform Agnostic**: C99 standard compliance, cross-platform portability
+- **Deterministic**: Predictable performance, bounded memory usage
+- **Extensible**: Version negotiation and feature detection support
 
-- Enable full mission control and telemetry using a compact, tamper-resistant binary format
-- Mediate all incoming commands through the existing safety and audit infrastructure
-- Support operation over UART, USB CDC, or SPI
-- Add support for message authentication, replay protection, and improved framing
-- Prepare for STANAG 4586 compatibility at the GCS layer
+## Key Features
 
----
+- **COBS Framing**: Consistent Overhead Byte Stuffing for reliable delimiter-based framing
+- **CRC16 Integrity**: CRC16-CCITT validation for corruption detection
+- **HMAC Authentication**: Optional HMAC-SHA256 with 16-byte truncation
+- **Replay Protection**: Session-based sequence number enforcement  
+- **Command Enforcement**: Mandatory authentication for command frames
+- **Cross-Platform**: Linux, macOS, Windows, and embedded system support
 
-## Protocol Frame Structure (v0.3)
+## Protocol Architecture
 
-| Field   | Size (bytes) | Description                                          |
-| ------- | ------------ | ---------------------------------------------------- |
-| SYNC    | 2            | Start marker: `0xAA 0x55`                            |
-| Version | 1            | Protocol version (e.g. `0x01`)                       |
-| MsgType | 1            | Message identifier                                   |
-| SeqNum  | 1            | Per-session sequence number                          |
-| Flags   | 1            | Bitfield: 0x01 = auth present, 0x02 = reserved (future compression) |
-| Length  | 2            | Payload size (including `auth_tag` if present)       |
-| Payload | N            | COBS-encoded message body (see below)                |
-| AuthTag | 16 (opt.)    | HMAC-SHA256 tag (if auth flag set)                   |
-| CRC16   | 2            | CRC-16-CCITT (header + payload + auth)               |
+### Wire Format
 
-The full frame (excluding SYNC) is COBS-encoded and terminated by a single 0x00 byte.
+ACP v0.3 uses Consistent Overhead Byte Stuffing (COBS) for reliable framing:
 
-- Framing: COBS (Consistent Overhead Byte Stuffing) encoding
-- Authentication: Optional per-message HMAC-SHA256 (truncated to 16 bytes)
-- Replay Protection: Session nonce + SeqNum enforcement. The session nonce is established during connection via `ack_response` and is required for all authenticated messages. It is not transmitted in each frame but is cached locally by both ends.
+```text
+COBS_FRAME[CRC16 | PAYLOAD] | DELIMITER
+```
 
----
+Where:
 
-## Message Types
+- **COBS_FRAME**: COBS-encoded packet containing CRC16 + PAYLOAD
+- **CRC16**: 2-byte CRC16-CCITT checksum (big-endian) of PAYLOAD
+- **PAYLOAD**: Message content (telemetry data or authenticated command)
+- **DELIMITER**: Single 0x00 byte marking frame boundary
 
-### GCS → Drone Commands
+### COBS Encoding Properties
 
-| MsgType | Name          | Description                   |
-| ------- | ------------- | ----------------------------- |
-| 0x01    | `cmd_control` | Arm, disarm, mode set         |
-| 0x02    | `cmd_gimbal`  | Gimbal movement commands      |
-| 0x03    | `cmd_config`  | Field or system config update |
+- **Zero Elimination**: No 0x00 bytes within encoded frame
+- **Overhead**: Maximum 1 byte per 254 bytes + 1 byte total
+- **Self-Synchronizing**: Frame boundaries are unambiguous
+- **Corruption Detection**: Encoding errors are detectable
 
-### Drone → GCS Telemetry / Events
+### CRC16 Implementation
 
-| MsgType | Name          | Description                  |
-| ------- | ------------- | ---------------------------- |
-| 0x10    | `tlm_status`  | Basic telemetry (state, GPS) |
-| 0x11    | `tlm_gimbal`  | Gimbal angle/status feedback |
-| 0x12    | `tlm_audit`   | Command audit log event      |
-| 0x13    | `tlm_mission` | Summary of mission log       |
+ACP uses CRC16-CCITT (polynomial 0x1021) with:
 
-### Responses
+- **Initial Value**: 0xFFFF
+- **Final XOR**: 0x0000
+- **Bit Order**: MSB first
+- **Byte Order**: Big-endian on wire
 
-| MsgType | Name           | Description                   |
-| ------- | -------------- | ----------------------------- |
-| 0x20    | `ack_response` | Acknowledgement w/ session ID |
-| 0x21    | `err_response` | Rejection reason / error code |
+### Frame Types
 
-### Response Structs
+ACP defines two primary frame types:
+
+#### Telemetry Frames
+
+```text
+| CRC16 | PAYLOAD_DATA |
+```
+
+- **CRC16**: Integrity checksum of PAYLOAD_DATA
+- **PAYLOAD_DATA**: Raw telemetry data (application-defined format)
+- **Authentication**: Not required (telemetry is read-only)
+
+#### Command Frames
+
+```text
+| CRC16 | HMAC_TAG | SEQUENCE | PAYLOAD_DATA |
+```
+
+- **CRC16**: Integrity checksum of (HMAC_TAG + SEQUENCE + PAYLOAD_DATA)
+- **HMAC_TAG**: 16-byte HMAC-SHA256 authentication tag
+- **SEQUENCE**: 4-byte sequence number (big-endian, replay protection)
+- **PAYLOAD_DATA**: Command data (application-defined format)
+- **Authentication**: Mandatory for all command frames
+
+### Session Management
+
+- **Keystore Integration**: Shared keys managed through platform keystore
+- **Sequence Numbers**: Monotonic counters prevent replay attacks
+- **Constant-Time Verification**: HMAC validation uses timing-safe comparison
+- **Command Enforcement**: All command frames must include valid authentication
+
+## Implementation Guidelines
+
+### Payload Format
+
+ACP is payload-agnostic. Applications define their own data formats within the PAYLOAD_DATA field. Common approaches include:
+
+- **Binary Structs**: Fixed-size C structures (ensure portable packing)
+- **TLV Encoding**: Type-Length-Value for extensible messages
+- **Protocol Buffers**: For complex, versioned message schemas
+- **JSON**: For human-readable debugging (though bandwidth-intensive)
+
+### Error Handling
+
+Implementations should handle:
+
+- **CRC Mismatches**: Discard corrupted frames silently
+- **COBS Decoding Errors**: Reset framing state and resynchronize  
+- **HMAC Failures**: Log authentication errors, reject commands
+- **Sequence Violations**: Detect replay attempts, maintain session state
+- **Buffer Overflows**: Validate frame sizes against available memory
+
+### Performance Considerations
+
+- **Zero-Copy Operation**: Process frames in-place when possible
+- **Bounded Memory**: All operations use stack allocation by default
+- **Constant-Time Crypto**: HMAC verification prevents timing attacks
+- **Incremental Processing**: Handle partial frames for streaming interfaces
+
+## Security Model
+
+### Authentication Architecture
+
+ACP implements defense-in-depth security:
+
+1. **Transport Security**: CRC16 ensures data integrity
+2. **Application Security**: HMAC-SHA256 provides authentication  
+3. **Replay Protection**: Sequence numbers prevent message replay
+4. **Access Control**: Commands require authentication, telemetry does not
+
+### Cryptographic Specifications
+
+- **Algorithm**: HMAC-SHA256 per RFC 2104
+- **Key Size**: 256-bit (32 bytes) shared secret
+- **Tag Size**: 128-bit (16 bytes) truncated output
+- **Verification**: Constant-time comparison prevents timing attacks
+
+### Threat Model
+
+ACP protects against:
+
+- **Data Corruption**: CRC16 detects transmission errors
+- **Command Injection**: HMAC authentication validates command source
+- **Replay Attacks**: Sequence numbers ensure message freshness
+- **Eavesdropping**: Telemetry remains readable (by design)
+
+ACP does not protect against:
+
+- **Key Compromise**: Shared keys must be managed securely
+- **Traffic Analysis**: Frame timing and sizes are observable
+- **Side-Channel Attacks**: Implementation must use constant-time operations
+
+## API Reference
+
+### Core Functions
+
+```c
+// Frame processing
+int acp_frame_encode(const uint8_t *payload, size_t payload_len, 
+                     uint8_t *output, size_t output_size, size_t *output_len);
+int acp_frame_decode(const uint8_t *input, size_t input_len,
+                     uint8_t *payload, size_t payload_size, size_t *payload_len);
+
+// Authentication  
+int acp_auth_set_key(const uint8_t *key, size_t key_len);
+int acp_auth_sign_command(const uint8_t *payload, size_t payload_len,
+                          uint32_t sequence, uint8_t *output, size_t output_size);
+int acp_auth_verify_command(const uint8_t *frame, size_t frame_len,
+                            uint32_t expected_sequence);
+```
 
 ```c
 typedef struct __attribute__((packed)) {
-  uint32_t session_id;
-  uint8_t seq_num;
-} ack_response_t;
+  ### Return Values
 
-typedef struct __attribute__((packed)) {
-  uint8_t error_code;      // see acp_err_t
-  uint8_t offending_type;  // original MsgType
-  uint8_t seq_num;
-} err_response_t;
-```
-
----
-
-## Example Structs (Packed C Representations)
-
-All multi-byte fields are encoded in little-endian format unless otherwise specified.
-
-### `cmd_control_t`
-
-```c
-typedef struct __attribute__((packed)) {
-  uint8_t arm;         // 0 = disarm, 1 = arm
-  uint8_t mode;        // 0 = hover, 1 = loiter, 2 = forward
-  uint32_t session_id; // GCS session identifier
-} cmd_control_t;
-```
-
-### `tlm_status_t`
-
-```c
-typedef struct __attribute__((packed)) {
-  uint8_t armed;
-  uint8_t mode;
-  uint8_t gps_fix;
-  uint8_t battery_percent;
-  int16_t roll, pitch, yaw;     // in degrees × 100
-  int32_t lat, lon, alt;        // in cm
-  uint32_t uptime_ms;
-  uint32_t timestamp_ms;
-  uint8_t seq_num;
-} tlm_status_t;
-```
-
-### `tlm_audit_t`
-
-```c
-typedef struct __attribute__((packed)) {
-  uint8_t source;     // 0 = GCS, 1 = Companion
-  uint8_t action;     // e.g., CMD_MODE_CHANGE
-  uint8_t result;     // 0 = reject, 1 = accept
-  uint32_t session_id;
-  uint32_t timestamp_ms;
-} tlm_audit_t;
-```
-
----
-
-## Safety & Mediation Requirements
-
-- All GCS commands must pass through the same audit + safety gates as companion inputs
-- Audit logs must capture:
-  - Command source (GCS/Companion)
-  - Result (accepted/rejected)
-  - Reason (if rejected)
-  - Session ID and timestamp
-- The `tlm_audit` message must be emitted immediately after every command evaluation, whether accepted or rejected, and precedes any `err_response`.
-- Unsupported MsgTypes must return `err_response` with expanded error codes
-
-### Error Codes
+All ACP functions return standard error codes:
 
 ```c
 typedef enum {
-  ERR_OK = 0x00,
-  ERR_UNKNOWN = 0x01,
-  ERR_CRC_FAIL = 0x02,
-  ERR_SAFETY_REJECT = 0x03,
-  ERR_AUTH_FAIL = 0x04,
-  ERR_RESOURCE = 0x05,
-  ERR_REPLAY = 0x06
-} acp_err_t;
+  ACP_OK = 0,              // Success
+  ACP_ERR_INVALID_ARG,     // Invalid function argument
+  ACP_ERR_BUFFER_SIZE,     // Insufficient buffer space
+  ACP_ERR_CRC_MISMATCH,    // CRC validation failed
+  ACP_ERR_AUTH_FAILED,     // HMAC authentication failed
+  ACP_ERR_DECODE_ERROR,    // COBS decoding error
+  ACP_ERR_SEQUENCE,        // Sequence number violation
+  ACP_ERR_NOT_INITIALIZED  // Authentication not configured
+} acp_result_t;
 ```
 
----
+## Conformance Requirements
 
-## Extensibility & Future Features
+### Frame Processing
 
-- Session management (auto-expiry after 15 min inactivity)
-- Dynamic telemetry rate configuration via `cmd_config`
-- Compression support for telemetry (bit-packed)
-- STANAG 4586 mapping table in GCS layer
+Conformant implementations must:
 
----
+- **COBS Encoding**: Use RFC-compliant COBS for all frames
+- **CRC16 Validation**: Compute CRC16-CCITT over payload data
+- **Zero Delimiter**: Terminate all frames with single 0x00 byte
+- **Buffer Management**: Handle frames up to 254 bytes payload
+- **Error Recovery**: Resynchronize on invalid frames
 
-## Implementation Notes
+### Authentication
 
-- COBS decoding and framing logic in `src/utils/acp_framer.c`
-- Authentication handled by `src/utils/acp_crypto.c` (HMAC-SHA256)
-- Framing logic should be encapsulated in `acp_framer.h`, authentication in `acp_crypto.h`.
-- Unit tests must verify:
-  - Round-trip encode/decode
-  - CRC mismatch rejection
-  - Replay rejection
-  - Auth tag verification
-  - Audit trail correctness
+For command processing:
 
----
+- **HMAC-SHA256**: Implement per RFC 2104 specification
+- **16-Byte Tags**: Truncate HMAC output to 128 bits
+- **Sequence Enforcement**: Reject out-of-order messages
+- **Constant-Time Verification**: Prevent timing attack vectors
+- **Key Management**: Integrate with platform keystore
 
-## Success Criteria
+### Platform Integration
 
-- ✅ Commands accepted only after safety checks and HMAC validation
-- ✅ Commands rejected produce `err_response` and `tlm_audit` entry
-- ✅ `tlm_status` transmitted at configured rate (1–10 Hz) with stable timing
-- ✅ Replay attempts rejected (sequence/nonce mismatch)
-- ✅ CRC failures drop packets with error log
-- ✅ Protocol backward-compatible with v1.0 (header interpreted safely)
+Implementations should provide:
 
----
+- **Cross-Platform Builds**: Support major operating systems
+- **Embedded Compatibility**: Function in resource-constrained environments
+- **Zero-Heap Operation**: Use stack allocation by default
+- **Thread Safety**: Provide synchronization primitives
+- **Logging Integration**: Support platform-specific logging
 
-## Out of Scope
+## Reference Implementation
 
-- ACP is the sole production protocol
-- No direct Lattice OS integration
-- No in-flight OTA configuration changes
+The reference implementation provides:
+
+- **Complete C99 Library**: Full protocol implementation
+- **Cross-Platform Support**: Linux, macOS, Windows, embedded
+- **Comprehensive Tests**: Unit tests and integration validation
+- **Example Applications**: Telemetry sender/receiver demos
+- **Documentation**: API reference and integration guides
+- **Build Systems**: CMake and Make support with installation
+
+## Version History
+
+### v0.3 (Current)
+
+- COBS framing with 0x00 delimiters
+- CRC16-CCITT integrity validation  
+- HMAC-SHA256 authentication with 16-byte tags
+- Sequence-based replay protection
+- Command frame enforcement
+- Cross-platform build system
+
+### Previous Versions
+
+- **v0.2**: SYNC-byte framing with length headers
+- **v0.1**: Basic binary protocol without authentication
+
+## Implementation Resources
+
+### Library Structure
+
+```text
+acp_framer.c     - COBS encoding/decoding and frame processing
+acp_crypto.c     - HMAC-SHA256 authentication and verification  
+acp_session.c    - Session management and sequence tracking
+acp_constants.c  - Protocol constants and configuration
+acp_nvs.c        - Non-volatile storage abstraction
+```
+
+### Platform Headers
+
+```text
+acp_platform_keystore.h  - Keystore integration interface
+acp_platform_time.h      - Time/timestamp services
+acp_platform_mutex.h     - Thread synchronization primitives  
+acp_platform_log.h       - Logging and debug output
+```
+
+### Testing
+
+The reference implementation includes comprehensive test coverage:
+
+- **Unit Tests**: Individual component validation
+- **Integration Tests**: End-to-end protocol operation
+- **Conformance Tests**: Standards compliance verification
+- **Platform Tests**: Cross-platform compatibility
+- **Security Tests**: Authentication and replay protection
+
+### Build Requirements
+
+- **C99 Compiler**: GCC, Clang, or MSVC
+- **CMake 3.10+**: Cross-platform build system
+- **Standard Library**: No external dependencies
+- **Platform Layer**: Implementation-specific keystore/logging
+
+## Conclusion
+
+ACP v0.3 provides a production-ready protocol for secure embedded communication. The combination of COBS framing, CRC16 integrity, and HMAC authentication delivers reliable message exchange suitable for safety-critical applications while maintaining compatibility with resource-constrained environments.
+
+For implementation guidance, API documentation, and integration examples, refer to the reference implementation repository and accompanying documentation suite.

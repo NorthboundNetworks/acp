@@ -1,0 +1,27 @@
+var searchData=
+[
+  ['data_0',['data',['../structacp__crc16__test__vector__t.html#a688842ac47bee4d0c5d3b72394130b49',1,'acp_crc16_test_vector_t']]],
+  ['data_20model_20—_20acp_20v0_203_1',['Data Model — ACP v0.3',['../md__2_users_2paulzanna_2_github_2acp_2specs_2001-acp-protocol-spec_2data-model.html',1,'']]],
+  ['data_20model_20and_20wire_20format_2',['Data model and wire format',['..//Users/paulzanna/Github/acp/README.md#autotoc_md146',1,'']]],
+  ['data_20oriented_3',['Key Entities (data-oriented)',['../md__2_users_2paulzanna_2_github_2acp_2specs_2001-acp-protocol-spec_2spec.html#autotoc_md225',1,'']]],
+  ['debug_20builds_4',['Debug Builds',['../md__b_u_i_l_d.html#autotoc_md84',1,'']]],
+  ['decode_20telemetry_20frame_5',['Phase 3 — User Story 1 (P1): Encode/Decode Telemetry Frame',['../md__2_users_2paulzanna_2_github_2acp_2specs_2001-acp-protocol-spec_2tasks.html#autotoc_md232',1,'']]],
+  ['decode_20telemetry_20frame_20priority_3a_20p1_6',['User Story 1 - Encode/Decode Telemetry Frame (Priority: P1)',['../md__2_users_2paulzanna_2_github_2acp_2specs_2001-acp-protocol-spec_2spec.html#autotoc_md215',1,'']]],
+  ['default_20implementation_7',['Default Implementation',['../md_keystore.html#autotoc_md109',1,'']]],
+  ['default_20platform_20support_8',['Default Platform Support',['..//Users/paulzanna/Github/acp/README.md#autotoc_md151',1,'']]],
+  ['default_20recommended_9',['No-Heap Default (Recommended)',['..//Users/paulzanna/Github/acp/README.md#autotoc_md143',1,'']]],
+  ['deliverables_10',['Deliverables',['../md__2_users_2paulzanna_2_github_2acp_2specs_2001-acp-protocol-spec_2spec.html',1,'Feature Specification: ACP Protocol Project Requirements and Deliverables'],['../md__2_users_2paulzanna_2_github_2acp_2specs_2001-acp-protocol-spec_2plan.html',1,'Implementation Plan: ACP Protocol Project Requirements and Deliverables'],['../md__2_users_2paulzanna_2_github_2acp_2specs_2001-acp-protocol-spec_2tasks.html',1,'Implementation Tasks — ACP Protocol Project Requirements and Deliverables'],['../md__2_users_2paulzanna_2_github_2acp_2specs_2001-acp-protocol-spec_2checklists_2requirements.html',1,'Specification Quality Checklist: ACP Protocol Project Requirements and Deliverables']]],
+  ['dependencies_11',['Assumptions and Dependencies',['../md__2_users_2paulzanna_2_github_2acp_2specs_2001-acp-protocol-spec_2spec.html#autotoc_md228',1,'']]],
+  ['dependencies_20story_20completion_20order_12',['Dependencies (story completion order)',['../md__2_users_2paulzanna_2_github_2acp_2specs_2001-acp-protocol-spec_2tasks.html#autotoc_md238',1,'']]],
+  ['deployment_13',['Production Deployment',['../md_keystore.html#autotoc_md130',1,'']]],
+  ['design_20principles_14',['Design Principles',['../md_acp__comm__spec__v0-3.html#autotoc_md30',1,'Design Principles'],['../md_keystore.html#autotoc_md108',1,'Design Principles']]],
+  ['details_15',['Details',['../md_keystore.html#autotoc_md112',1,'File Format Details'],['../md_crc16.html#autotoc_md90',1,'Implementation Details'],['../md__2_users_2paulzanna_2_github_2acp_2specs_2001-acp-protocol-spec_2research.html',1,'Phase 0 Research — ACP Protocol Implementation Details']]],
+  ['detection_20capability_16',['Error Detection Capability',['../md_crc16.html#autotoc_md100',1,'']]],
+  ['developer_20experience_20100_20complete_17',['&lt;b&gt;Build System &amp;amp; Developer Experience (100% Complete)&lt;/b&gt;',['../md__2_users_2paulzanna_2_github_2acp_2specs_2001-acp-protocol-spec_2tasks.html#autotoc_md243',1,'']]],
+  ['development_20testing_18',['Development/Testing',['../md_keystore.html#autotoc_md131',1,'']]],
+  ['diagnostic_20commands_19',['Diagnostic Commands',['../md_keystore.html#autotoc_md127',1,'']]],
+  ['documentation_20',['Documentation',['..//Users/paulzanna/Github/acp/README.md#autotoc_md147',1,'']]],
+  ['documentation_20this_20feature_21',['Documentation (this feature)',['../md__2_users_2paulzanna_2_github_2acp_2specs_2001-acp-protocol-spec_2plan.html#autotoc_md191',1,'']]],
+  ['drone_20→_20gcs_20telemetry_20events_22',['Drone → GCS Telemetry / Events',['../md_acp__comm__spec__v0-2.html#autotoc_md9',1,'']]],
+  ['drone_20commands_23',['GCS → Drone Commands',['../md_acp__comm__spec__v0-2.html#autotoc_md8',1,'']]]
+];

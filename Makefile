@@ -162,7 +162,7 @@ $(BUILD_DIR) $(OBJ_DIR) $(LIB_DIR) $(BIN_DIR):
 .PHONY: clean
 clean:
 	rm -rf $(BUILD_DIR)
-	rm -f $(DOC_DIR)/html $(DOC_DIR)/latex
+	rm -rf $(DOC_DIR)/html $(DOC_DIR)/latex
 
 .PHONY: distclean
 distclean: clean

@@ -1,6 +1,15 @@
 var files_dup =
 [
-    [ "build_test", "dir_72dd63a604b4049b96e472af8c943e4b.html", "dir_72dd63a604b4049b96e472af8c943e4b" ],
+    [ "build_test", "dir_f06f16ff3135549ba28ec9197a9ccd28.html", "dir_f06f16ff3135549ba28ec9197a9ccd28" ],
+    [ "Citadel", "dir_230d05ebb2f9ee5e5c50bbfdf16f4e3c.html", "dir_230d05ebb2f9ee5e5c50bbfdf16f4e3c" ],
+    [ "Eunice", "dir_b0ffaa9650680648f71633623b80e4c9.html", "dir_b0ffaa9650680648f71633623b80e4c9" ],
+    [ "examples", "dir_8e9862f1883c806adcdc740653afcd8e.html", "dir_8e9862f1883c806adcdc740653afcd8e" ],
+    [ "LD-6", "dir_49eb6ae97f4a8e35d0a09043492df0c2.html", "dir_49eb6ae97f4a8e35d0a09043492df0c2" ],
+    [ "Planning", "dir_2265d85848d29287bb3825cf17fd0573.html", "dir_2265d85848d29287bb3825cf17fd0573" ],
+    [ "Rpi_BDM", "dir_e39788ff33c4970807eb479b9f1f3e94.html", null ],
+    [ "Scout", "dir_f76dd88a88a2d119ab336e5933bd9b31.html", "dir_f76dd88a88a2d119ab336e5933bd9b31" ],
+    [ "Shield", "dir_1095dcccc5277bfd3a2095471f365378.html", "dir_1095dcccc5277bfd3a2095471f365378" ],
+    [ "tests", "dir_2e65de4c3b534dc761262d9ce2428e9f.html", "dir_2e65de4c3b534dc761262d9ce2428e9f" ],
     [ "acp.c", "acp_8c.html", "acp_8c" ],
     [ "acp_cobs.c", "acp__cobs_8c.html", "acp__cobs_8c" ],
     [ "acp_cobs.h", "acp__cobs_8h.html", "acp__cobs_8h" ],

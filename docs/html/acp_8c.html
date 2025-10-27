@@ -5,7 +5,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=11"/>
 <meta name="generator" content="Doxygen 1.15.0"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>ACP - Autonomous Command Protocol: /Users/paulzanna/Github/acp/acp.c File Reference</title>
+<title>ACP - Autonomous Command Protocol: acp.c File Reference</title>
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="jquery.js"></script>
 <script type="text/javascript" src="dynsections.js"></script>
@@ -89,7 +89,7 @@ $(function(){initNavTree('acp_8c.html','',''); });
 </div>
 
 <div class="header">
-  <div class="headertitle"><div class="title">/Users/paulzanna/Github/acp/acp.c File Reference</div></div>
+  <div class="headertitle"><div class="title">acp.c File Reference</div></div>
 </div><!--header-->
 <div class="contents">
 
@@ -163,6 +163,8 @@ Variables</h2></td></tr>
 
 <p class="reference">References <a class="el" href="acp_8c_source.html#l00048">acp_initialized</a>.</p>
 
+<p class="reference">Referenced by <a class="el" href="acp__client_8c_source.html#l00257">main()</a>.</p>
+
 </div>
 </div>
 <a id="a24ae8e0c5480377b2888b9671b7628b0" name="a24ae8e0c5480377b2888b9671b7628b0"></a>
@@ -228,6 +230,8 @@ Variables</h2></td></tr>
 <p class="definition">Definition at line <a class="el" href="acp_8c_source.html#l00192">192</a> of file <a class="el" href="acp_8c_source.html">acp.c</a>.</p>
 
 <p class="reference">References <a class="el" href="acp__cobs_8h_source.html#l00051">ACP_COBS_DELIMITER</a>, <a class="el" href="acp__crypto_8c_source.html#l00307">acp_crypto_memcmp_ct()</a>, <a class="el" href="acp__errors_8h_source.html#l00125">ACP_ERR_AUTH_FAILED</a>, <a class="el" href="acp__errors_8h_source.html#l00124">ACP_ERR_AUTH_REQUIRED</a>, <a class="el" href="acp__errors_8h_source.html#l00085">ACP_ERR_INVALID_PARAM</a>, <a class="el" href="acp__errors_8h_source.html#l00099">ACP_ERR_MALFORMED_FRAME</a>, <a class="el" href="acp__errors_8h_source.html#l00087">ACP_ERR_NEED_MORE_DATA</a>, <a class="el" href="acp__errors_8h_source.html#l00126">ACP_ERR_REPLAY</a>, <a class="el" href="acp__errors_8h_source.html#l00128">ACP_ERR_SESSION_NOT_INIT</a>, <a class="el" href="acp__protocol_8h_source.html#l00100">ACP_FLAG_AUTHENTICATED</a>, <a class="el" href="acp__framer_8c_source.html#l00131">acp_frame_decode()</a>, <a class="el" href="acp_8c_source.html#l00330">acp_frame_requires_auth()</a>, <a class="el" href="acp__crypto_8c_source.html#l00246">acp_hmac_sha256()</a>, <a class="el" href="acp__protocol_8h_source.html#l00062">ACP_HMAC_TAG_LEN</a>, <a class="el" href="acp__protocol_8h_source.html#l00065">ACP_KEY_SIZE</a>, <a class="el" href="acp__errors_8h_source.html#l00082">ACP_OK</a>, <a class="el" href="acp__protocol_8h_source.html#l00178">acp_frame_t::flags</a>, <a class="el" href="acp__protocol_8h_source.html#l00197">acp_session_t::initialized</a>, <a class="el" href="acp__protocol_8h_source.html#l00192">acp_session_t::key</a>, <a class="el" href="acp__protocol_8h_source.html#l00195">acp_session_t::last_accepted_seq</a>, <a class="el" href="acp__protocol_8h_source.html#l00180">acp_frame_t::sequence</a>, and <a class="el" href="acp__protocol_8h_source.html#l00177">acp_frame_t::type</a>.</p>
+
+<p class="reference">Referenced by <a class="el" href="acp__client_8c_source.html#l00156">demo_authenticated_command()</a>, <a class="el" href="acp__client_8c_source.html#l00084">demo_telemetry_frame()</a>, <a class="el" href="mock__serial_8c_source.html#l00199">receive_frames()</a>, and <a class="el" href="mock__serial_8c_source.html#l00310">test_partial_reads()</a>.</p>
 
 </div>
 </div>
@@ -307,6 +311,8 @@ Variables</h2></td></tr>
 <p class="definition">Definition at line <a class="el" href="acp_8c_source.html#l00097">97</a> of file <a class="el" href="acp_8c_source.html">acp.c</a>.</p>
 
 <p class="reference">References <a class="el" href="acp__errors_8h_source.html#l00124">ACP_ERR_AUTH_REQUIRED</a>, <a class="el" href="acp__errors_8h_source.html#l00086">ACP_ERR_BUFFER_TOO_SMALL</a>, <a class="el" href="acp__errors_8h_source.html#l00085">ACP_ERR_INVALID_PARAM</a>, <a class="el" href="acp__errors_8h_source.html#l00097">ACP_ERR_INVALID_TYPE</a>, <a class="el" href="acp__errors_8h_source.html#l00098">ACP_ERR_PAYLOAD_TOO_LARGE</a>, <a class="el" href="acp__errors_8h_source.html#l00128">ACP_ERR_SESSION_NOT_INIT</a>, <a class="el" href="acp__protocol_8h_source.html#l00100">ACP_FLAG_AUTHENTICATED</a>, <a class="el" href="acp__framer_8c_source.html#l00046">acp_frame_encode()</a>, <a class="el" href="acp_8c_source.html#l00330">acp_frame_requires_auth()</a>, <a class="el" href="acp__crypto_8c_source.html#l00246">acp_hmac_sha256()</a>, <a class="el" href="acp__protocol_8h_source.html#l00062">ACP_HMAC_TAG_LEN</a>, <a class="el" href="acp_8c_source.html#l00314">acp_is_valid_frame_type()</a>, <a class="el" href="acp__protocol_8h_source.html#l00065">ACP_KEY_SIZE</a>, <a class="el" href="acp__protocol_8h_source.html#l00056">ACP_MAX_PAYLOAD_SIZE</a>, <a class="el" href="acp__errors_8h_source.html#l00082">ACP_OK</a>, <a class="el" href="acp__protocol_8h_source.html#l00080">ACP_PROTOCOL_VERSION</a>, <a class="el" href="acp__protocol_8h_source.html#l00178">acp_frame_t::flags</a>, <a class="el" href="acp__protocol_8h_source.html#l00192">acp_session_t::key</a>, <a class="el" href="acp__protocol_8h_source.html#l00179">acp_frame_t::length</a>, <a class="el" href="acp__protocol_8h_source.html#l00194">acp_session_t::next_sequence</a>, <a class="el" href="acp__protocol_8h_source.html#l00181">acp_frame_t::payload</a>, <a class="el" href="acp__protocol_8h_source.html#l00180">acp_frame_t::sequence</a>, <a class="el" href="acp__protocol_8h_source.html#l00177">acp_frame_t::type</a>, and <a class="el" href="acp__protocol_8h_source.html#l00176">acp_frame_t::version</a>.</p>
+
+<p class="reference">Referenced by <a class="el" href="acp__client_8c_source.html#l00156">demo_authenticated_command()</a>, <a class="el" href="acp__client_8c_source.html#l00084">demo_telemetry_frame()</a>, <a class="el" href="mock__serial_8c_source.html#l00122">send_sample_frames()</a>, and <a class="el" href="mock__serial_8c_source.html#l00310">test_partial_reads()</a>.</p>
 
 </div>
 </div>
@@ -426,6 +432,8 @@ Variables</h2></td></tr>
 <p class="definition">Definition at line <a class="el" href="acp_8c_source.html#l00057">57</a> of file <a class="el" href="acp_8c_source.html">acp.c</a>.</p>
 
 <p class="reference">References <a class="el" href="acp__crc16_8c_source.html#l00048">acp_crc16_init_table()</a>, <a class="el" href="acp_8c_source.html#l00048">acp_initialized</a>, and <a class="el" href="acp__errors_8h_source.html#l00082">ACP_OK</a>.</p>
+
+<p class="reference">Referenced by <a class="el" href="acp__client_8c_source.html#l00257">main()</a>.</p>
 
 </div>
 </div>
