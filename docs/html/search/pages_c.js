@@ -1,0 +1,25 @@
+var searchData=
+[
+  ['edge_20cases_0',['Edge Cases',['../md__2_users_2paulzanna_2_github_2acp_2specs_2001-acp-protocol-spec_2spec.html#autotoc_md166',1,'']]],
+  ['embedded_20cortex_20m_1',['ARM Embedded (Cortex-M)',['../md__b_u_i_l_d.html#autotoc_md82',1,'']]],
+  ['embedded_20systems_2',['Embedded Systems',['../md__b_u_i_l_d.html#autotoc_md69',1,'']]],
+  ['encode_20decode_20telemetry_20frame_3',['Phase 3 — User Story 1 (P1): Encode/Decode Telemetry Frame',['../md__2_users_2paulzanna_2_github_2acp_2specs_2001-acp-protocol-spec_2tasks.html#autotoc_md176',1,'']]],
+  ['encode_20decode_20telemetry_20frame_20priority_3a_20p1_4',['User Story 1 - Encode/Decode Telemetry Frame (Priority: P1)',['../md__2_users_2paulzanna_2_github_2acp_2specs_2001-acp-protocol-spec_2spec.html#autotoc_md159',1,'']]],
+  ['endianness_5',['Frame Header and Endianness',['../md__2_users_2paulzanna_2_github_2acp_2specs_2001-acp-protocol-spec_2research.html#autotoc_md148',1,'']]],
+  ['entities_6',['Entities',['../md__2_users_2paulzanna_2_github_2acp_2specs_2001-acp-protocol-spec_2data-model.html#autotoc_md123',1,'']]],
+  ['entities_20data_20oriented_7',['Key Entities (data-oriented)',['../md__2_users_2paulzanna_2_github_2acp_2specs_2001-acp-protocol-spec_2spec.html#autotoc_md169',1,'']]],
+  ['error_20codes_8',['Error Codes',['../md_acp__comm__spec__v0-2.html#autotoc_md19',1,'Error Codes'],['../md_acp__comm__spec__v0-3.html#autotoc_md47',1,'Error Codes']]],
+  ['error_20codes_20excerpt_9',['Error Codes (excerpt)',['../md__2_users_2paulzanna_2_github_2acp_2specs_2001-acp-protocol-spec_2data-model.html#autotoc_md129',1,'']]],
+  ['error_20semantics_10',['Error Semantics',['../md__2_users_2paulzanna_2_github_2acp_2specs_2001-acp-protocol-spec_2contracts_2c-api.html#autotoc_md120',1,'']]],
+  ['errors_11',['Payload Constraints and Errors',['../md__2_users_2paulzanna_2_github_2acp_2specs_2001-acp-protocol-spec_2research.html#autotoc_md149',1,'']]],
+  ['events_12',['Events',['../md_acp__comm__spec__v0-2.html#autotoc_md9',1,'Drone → GCS Telemetry / Events'],['../md_acp__comm__spec__v0-3.html#autotoc_md37',1,'Drone → GCS Telemetry / Events']]],
+  ['example_13',['Code Example',['../md__b_u_i_l_d.html#autotoc_md79',1,'']]],
+  ['example_20structs_20packed_20c_20representations_14',['Example Structs Packed C Representations',['../md_acp__comm__spec__v0-2.html#autotoc_md13',1,'Example Structs (Packed C Representations)'],['../md_acp__comm__spec__v0-3.html#autotoc_md41',1,'Example Structs (Packed C Representations)']]],
+  ['examples_15',['Parallel execution examples',['../md__2_users_2paulzanna_2_github_2acp_2specs_2001-acp-protocol-spec_2tasks.html#autotoc_md183',1,'']]],
+  ['examples_20and_20tests_16',['Examples and tests',['..//Users/paulzanna/Github/acp/README.md#autotoc_md100',1,'']]],
+  ['excerpt_17',['Error Codes (excerpt)',['../md__2_users_2paulzanna_2_github_2acp_2specs_2001-acp-protocol-spec_2data-model.html#autotoc_md129',1,'']]],
+  ['execution_20examples_18',['Parallel execution examples',['../md__2_users_2paulzanna_2_github_2acp_2specs_2001-acp-protocol-spec_2tasks.html#autotoc_md183',1,'']]],
+  ['experience_20100_20complete_19',['&lt;b&gt;Build System &amp;amp; Developer Experience (100% Complete)&lt;/b&gt;',['../md__2_users_2paulzanna_2_github_2acp_2specs_2001-acp-protocol-spec_2tasks.html#autotoc_md187',1,'']]],
+  ['extended_20build_20system_20completed_20',['Phase 5A — Extended Build System (completed)',['../md__2_users_2paulzanna_2_github_2acp_2specs_2001-acp-protocol-spec_2tasks.html#autotoc_md179',1,'']]],
+  ['extensibility_20future_20features_21',['Extensibility Future Features',['../md_acp__comm__spec__v0-2.html#autotoc_md21',1,'Extensibility &amp;amp; Future Features'],['../md_acp__comm__spec__v0-3.html#autotoc_md49',1,'Extensibility &amp;amp; Future Features']]]
+];

@@ -1,0 +1,25 @@
+var searchData=
+[
+  ['bit_5flen_0',['bit_len',['../structacp__sha256__ctx__t.html#a0960be35953dcc0436090c13de6cd27c',1,'acp_sha256_ctx_t']]],
+  ['blocking_20prerequisites_1',['Phase 2 — Foundational (blocking prerequisites)',['../md__2_users_2paulzanna_2_github_2acp_2specs_2001-acp-protocol-spec_2tasks.html#autotoc_md175',1,'']]],
+  ['buffer_2',['buffer',['../structacp__cobs__decoder__t.html#adb011ab0973d1fe4d1d9e2304412384f',1,'acp_cobs_decoder_t::buffer'],['../structacp__sha256__ctx__t.html#a66c9ee6abb1f9f2227ff105f2cf45a19',1,'acp_sha256_ctx_t::buffer']]],
+  ['buffer_5flen_3',['buffer_len',['../structacp__sha256__ctx__t.html#a85bb960f049ccd9409f6ef301e186daa',1,'acp_sha256_ctx_t']]],
+  ['buffer_5fpos_4',['buffer_pos',['../structacp__cobs__decoder__t.html#a5fb0cade982fda587cfd97baf435da22',1,'acp_cobs_decoder_t']]],
+  ['buffer_5fsize_5',['buffer_size',['../structacp__cobs__decoder__t.html#a21e3b0ca1d2944f92469dd2e2eb79c46',1,'acp_cobs_decoder_t']]],
+  ['build_6',['Build',['..//Users/paulzanna/Github/acp/README.md#autotoc_md93',1,'Build'],['../md__2_users_2paulzanna_2_github_2acp_2specs_2001-acp-protocol-spec_2quickstart.html#autotoc_md140',1,'Build']]],
+  ['build_20and_20link_7',['Phase 5 — User Story 3 (P2): Cross-Platform Build and Link',['../md__2_users_2paulzanna_2_github_2acp_2specs_2001-acp-protocol-spec_2tasks.html#autotoc_md178',1,'']]],
+  ['build_20and_20link_20priority_3a_20p2_8',['User Story 3 - Cross-Platform Build and Link (Priority: P2)',['../md__2_users_2paulzanna_2_github_2acp_2specs_2001-acp-protocol-spec_2spec.html#autotoc_md163',1,'']]],
+  ['build_20and_20toolchains_9',['Build and Toolchains',['../md__2_users_2paulzanna_2_github_2acp_2specs_2001-acp-protocol-spec_2research.html#autotoc_md151',1,'']]],
+  ['build_20cmake_10',['Fast Build (CMake)',['../md__b_u_i_l_d.html#autotoc_md60',1,'']]],
+  ['build_20guide_11',['ACP Library Build Guide',['../md__b_u_i_l_d.html',1,'']]],
+  ['build_20issues_12',['Common Build Issues',['../md__b_u_i_l_d.html#autotoc_md85',1,'']]],
+  ['build_20make_13',['Fast Build (Make)',['../md__b_u_i_l_d.html#autotoc_md61',1,'']]],
+  ['build_20matrix_14',['Build Matrix',['..//Users/paulzanna/Github/acp/README.md#autotoc_md102',1,'']]],
+  ['build_20options_15',['Build Options',['../md__b_u_i_l_d.html#autotoc_md70',1,'Build Options'],['..//Users/paulzanna/Github/acp/README.md#autotoc_md96',1,'Build Options']]],
+  ['build_20system_20completed_16',['Phase 5A — Extended Build System (completed)',['../md__2_users_2paulzanna_2_github_2acp_2specs_2001-acp-protocol-spec_2tasks.html#autotoc_md179',1,'']]],
+  ['build_20system_20developer_20experience_20100_20complete_17',['&lt;b&gt;Build System &amp;amp; Developer Experience (100% Complete)&lt;/b&gt;',['../md__2_users_2paulzanna_2_github_2acp_2specs_2001-acp-protocol-spec_2tasks.html#autotoc_md187',1,'']]],
+  ['build_20systems_18',['Build Systems',['../md__b_u_i_l_d.html#autotoc_md62',1,'']]],
+  ['build_5fdate_19',['build_date',['../structacp__version__info__t.html#ac51cf05c4172d63ea9f1177f29ba172c',1,'acp_version_info_t']]],
+  ['build_5ftime_20',['build_time',['../structacp__version__info__t.html#aac19be820f9af48f67cb8157e0ea6a46',1,'acp_version_info_t']]],
+  ['builds_21',['Debug Builds',['../md__b_u_i_l_d.html#autotoc_md87',1,'']]]
+];

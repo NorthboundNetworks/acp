@@ -1,0 +1,25 @@
+var searchData=
+[
+  ['m_0',['ARM Embedded (Cortex-M)',['../md__b_u_i_l_d.html#autotoc_md82',1,'']]],
+  ['macos_20intel_20apple_20silicon_1',['macOS (Intel, Apple Silicon)',['../md__b_u_i_l_d.html#autotoc_md67',1,'']]],
+  ['magic_2',['magic',['../structacp__keystore__header__t.html#a0da8dbc7a66cc12baf701cc113352143',1,'acp_keystore_header_t']]],
+  ['major_3',['major',['../structacp__version__info__t.html#a700e613d22dfde496b05afc8ea4fe1e9',1,'acp_version_info_t']]],
+  ['make_4',['Make',['../md__b_u_i_l_d.html#autotoc_md61',1,'Fast Build (Make)'],['../md__b_u_i_l_d.html#autotoc_md64',1,'Make']]],
+  ['make_20options_5',['Make Options',['../md__b_u_i_l_d.html#autotoc_md72',1,'']]],
+  ['management_6',['Session Management',['../md__2_users_2paulzanna_2_github_2acp_2specs_2001-acp-protocol-spec_2contracts_2c-api.html#autotoc_md118',1,'']]],
+  ['manager_20integration_7',['Package Manager Integration',['../md__b_u_i_l_d.html#autotoc_md75',1,'']]],
+  ['mandatory_8',['mandatory',['../md__2_users_2paulzanna_2_github_2acp_2specs_2001-acp-protocol-spec_2spec.html#autotoc_md167',1,'Requirements (mandatory)'],['../md__2_users_2paulzanna_2_github_2acp_2specs_2001-acp-protocol-spec_2spec.html#autotoc_md170',1,'Success Criteria (mandatory)'],['../md__2_users_2paulzanna_2_github_2acp_2specs_2001-acp-protocol-spec_2spec.html#autotoc_md158',1,'User Scenarios &amp;amp; Testing (mandatory)']]],
+  ['matrix_9',['Build Matrix',['..//Users/paulzanna/Github/acp/README.md#autotoc_md102',1,'']]],
+  ['measurable_20outcomes_10',['Measurable Outcomes',['../md__2_users_2paulzanna_2_github_2acp_2specs_2001-acp-protocol-spec_2spec.html#autotoc_md171',1,'']]],
+  ['mediation_20requirements_11',['Mediation Requirements',['../md_acp__comm__spec__v0-2.html#autotoc_md18',1,'Safety &amp;amp; Mediation Requirements'],['../md_acp__comm__spec__v0-3.html#autotoc_md46',1,'Safety &amp;amp; Mediation Requirements']]],
+  ['message_12',['message',['../structacp__error__info__t.html#a9746ed9463ee88dc1fc14b6c9ba8e0b7',1,'acp_error_info_t']]],
+  ['message_20types_13',['Message Types',['../md_acp__comm__spec__v0-2.html#autotoc_md7',1,'Message Types'],['../md_acp__comm__spec__v0-3.html#autotoc_md35',1,'Message Types']]],
+  ['met_14',['&lt;b&gt;Production Readiness Criteria Met&lt;/b&gt;',['../md__2_users_2paulzanna_2_github_2acp_2specs_2001-acp-protocol-spec_2tasks.html#autotoc_md189',1,'']]],
+  ['mingw_15',['Windows from Linux (MinGW)',['../md__b_u_i_l_d.html#autotoc_md83',1,'']]],
+  ['mingw_20msvc_16',['Windows (MinGW, MSVC)',['../md__b_u_i_l_d.html#autotoc_md68',1,'']]],
+  ['minimal_20usage_17',['Minimal usage',['../md__2_users_2paulzanna_2_github_2acp_2specs_2001-acp-protocol-spec_2quickstart.html#autotoc_md141',1,'']]],
+  ['minor_18',['minor',['../structacp__version__info__t.html#a9d6d6a8ebe303772d29eb83331be34d5',1,'acp_version_info_t']]],
+  ['model_20—_20acp_20v0_203_19',['Data Model — ACP v0.3',['../md__2_users_2paulzanna_2_github_2acp_2specs_2001-acp-protocol-spec_2data-model.html',1,'']]],
+  ['model_20and_20wire_20format_20',['Data model and wire format',['..//Users/paulzanna/Github/acp/README.md#autotoc_md99',1,'']]],
+  ['msvc_21',['Windows (MinGW, MSVC)',['../md__b_u_i_l_d.html#autotoc_md68',1,'']]]
+];

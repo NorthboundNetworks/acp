@@ -42,6 +42,7 @@ ACP supports both CMake and Make build systems with full cross-platform support:
 ### Quick Start
 
 **CMake (Recommended):**
+
 ```bash
 mkdir build && cd build
 cmake .. -DCMAKE_BUILD_TYPE=Release
@@ -49,6 +50,7 @@ cmake --build . --parallel
 ```
 
 **Make:**
+
 ```bash
 make all
 ```
@@ -92,20 +94,61 @@ make install PREFIX=/usr/local
 
 See `docs/acp_comm_spec_v0-3.md` and `specs/001-acp-protocol-spec/spec.md` for details.
 
+## Documentation
+
+**Full API documentation is available in the generated HTML docs:**
+
+To generate locally:
+
+```bash
+# Install doxygen (if not already installed)
+# On macOS: brew install doxygen
+# On Ubuntu: apt-get install doxygen
+# On Windows: download from https://doxygen.nl
+
+cd docs && doxygen Doxyfile
+open html/index.html
+```
+
+The documentation includes:
+
+- Complete API reference with function documentation
+- Data structure details and relationships  
+- Usage examples and integration guides
+- Protocol specification and wire format details
+
 ## Examples and tests
 
-Planned and tracked in `specs/001-acp-protocol-spec/tasks.md`:
+Comprehensive test suite includes:
 
-- Round-trip encode/decode tests (COBS + CRC16)
-- CRC16 known vectors
-- HMAC vectors and negative tests (bad/absent tags on commands)
-- Replay rejection tests
-- Byte-order conformance tests
-- Example apps: `acp_client.c`, `mock_serial.c`
+- ✅ Round-trip encode/decode tests (COBS + CRC16)
+- ✅ CRC16 known vectors
+- ✅ HMAC vectors and negative tests (bad/absent tags on commands)
+- ✅ Replay rejection tests
+- ✅ Byte-order conformance tests
+- ✅ No-heap verification for embedded systems
+- ⚠️ Example apps: `acp_client.c`, `mock_serial.c` (planned)
 
-## API status
+Run tests with:
 
-The public API header `acp_protocol.h` and versioning header will be introduced per tasks (T009–T012). A draft of the API is available in `specs/001-acp-protocol-spec/contracts/c-api.md`.
+```bash
+# CMake
+cd build && ctest
+
+# Make  
+make test
+```
+
+## API Reference
+
+The complete public API is defined in `acp_protocol.h` with full type safety and documentation. Key components:
+
+- **Frame Management**: `acp_frame_encode()`, `acp_frame_decode()`
+- **Session Management**: `acp_session_init()`, `acp_session_rotate()`
+- **Cryptography**: `acp_hmac_sha256()`, `acp_crypto_memcmp_ct()`
+- **Platform Integration**: Keystore, logging, time, and mutex abstractions
+
+See the generated HTML documentation or `specs/001-acp-protocol-spec/contracts/c-api.md` for detailed API contracts.
 
 ## Build Matrix
 
@@ -120,6 +163,7 @@ The public API header `acp_protocol.h` and versioning header will be introduced 
 | ARM Embedded | arm-none-eabi-gcc | ✅ | N/A | Cross-compilation support |
 
 **Legend:**
+
 - ✅ Fully supported and tested
 - ⚠️ Planned for future release  
 - ❌ Not supported

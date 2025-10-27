@@ -1,0 +1,25 @@
+var searchData=
+[
+  ['readiness_0',['Feature Readiness',['../md__2_users_2paulzanna_2_github_2acp_2specs_2001-acp-protocol-spec_2checklists_2requirements.html#autotoc_md107',1,'']]],
+  ['readiness_20criteria_20met_1',['&lt;b&gt;Production Readiness Criteria Met&lt;/b&gt;',['../md__2_users_2paulzanna_2_github_2acp_2specs_2001-acp-protocol-spec_2tasks.html#autotoc_md189',1,'']]],
+  ['recommended_2',['CMake (Recommended)',['../md__b_u_i_l_d.html#autotoc_md63',1,'']]],
+  ['recoverable_3',['recoverable',['../structacp__error__info__t.html#ac2bd641a78c572f206b6b62d2469dc6e',1,'acp_error_info_t']]],
+  ['reference_4',['ACP — Autonomous Command Protocol (C99 Reference)',['..//Users/paulzanna/Github/acp/README.md#autotoc_md90',1,'']]],
+  ['reference_20c_20library_5',['Quickstart — ACP Reference C Library',['../md__2_users_2paulzanna_2_github_2acp_2specs_2001-acp-protocol-spec_2quickstart.html',1,'']]],
+  ['replay_20protection_6',['Authentication and Replay Protection',['../md__2_users_2paulzanna_2_github_2acp_2specs_2001-acp-protocol-spec_2research.html#autotoc_md147',1,'']]],
+  ['repository_20root_7',['Source Code (repository root)',['../md__2_users_2paulzanna_2_github_2acp_2specs_2001-acp-protocol-spec_2plan.html#autotoc_md136',1,'']]],
+  ['repository_20structure_8',['Repository structure',['..//Users/paulzanna/Github/acp/README.md#autotoc_md92',1,'']]],
+  ['representations_9',['Representations',['../md_acp__comm__spec__v0-2.html#autotoc_md13',1,'Example Structs (Packed C Representations)'],['../md_acp__comm__spec__v0-3.html#autotoc_md41',1,'Example Structs (Packed C Representations)']]],
+  ['requirement_20completeness_10',['Requirement Completeness',['../md__2_users_2paulzanna_2_github_2acp_2specs_2001-acp-protocol-spec_2checklists_2requirements.html#autotoc_md106',1,'']]],
+  ['requirements_11',['Requirements',['../md__2_users_2paulzanna_2_github_2acp_2specs_2001-acp-protocol-spec_2spec.html#autotoc_md168',1,'Functional Requirements'],['../md_acp__comm__spec__v0-2.html#autotoc_md18',1,'Safety &amp;amp; Mediation Requirements'],['../md_acp__comm__spec__v0-3.html#autotoc_md46',1,'Safety &amp;amp; Mediation Requirements']]],
+  ['requirements_20and_20deliverables_12',['Requirements and Deliverables',['../md__2_users_2paulzanna_2_github_2acp_2specs_2001-acp-protocol-spec_2spec.html',1,'Feature Specification: ACP Protocol Project Requirements and Deliverables'],['../md__2_users_2paulzanna_2_github_2acp_2specs_2001-acp-protocol-spec_2plan.html',1,'Implementation Plan: ACP Protocol Project Requirements and Deliverables'],['../md__2_users_2paulzanna_2_github_2acp_2specs_2001-acp-protocol-spec_2tasks.html',1,'Implementation Tasks — ACP Protocol Project Requirements and Deliverables'],['../md__2_users_2paulzanna_2_github_2acp_2specs_2001-acp-protocol-spec_2checklists_2requirements.html',1,'Specification Quality Checklist: ACP Protocol Project Requirements and Deliverables']]],
+  ['requirements_20mandatory_13',['Requirements (mandatory)',['../md__2_users_2paulzanna_2_github_2acp_2specs_2001-acp-protocol-spec_2spec.html#autotoc_md167',1,'']]],
+  ['research_20—_20acp_20protocol_20implementation_20details_14',['Phase 0 Research — ACP Protocol Implementation Details',['../md__2_users_2paulzanna_2_github_2acp_2specs_2001-acp-protocol-spec_2research.html',1,'']]],
+  ['reserved_15',['reserved',['../structacp__keystore__header__t.html#a128b0c02015484365a39e9ab2e969c7a',1,'acp_keystore_header_t::reserved'],['../structacp__keystore__entry__t.html#a5a6e89cf6610ad13fc90525e56e035a9',1,'acp_keystore_entry_t::reserved']]],
+  ['resolved_20here_16',['Open Questions (resolved here)',['../md__2_users_2paulzanna_2_github_2acp_2specs_2001-acp-protocol-spec_2research.html#autotoc_md153',1,'']]],
+  ['response_20structs_17',['Response Structs',['../md_acp__comm__spec__v0-2.html#autotoc_md11',1,'Response Structs'],['../md_acp__comm__spec__v0-3.html#autotoc_md39',1,'Response Structs']]],
+  ['responses_18',['Responses',['../md_acp__comm__spec__v0-2.html#autotoc_md10',1,'Responses'],['../md_acp__comm__spec__v0-3.html#autotoc_md38',1,'Responses']]],
+  ['results_20iteration_201_19',['Validation Results (Iteration 1)',['../md__2_users_2paulzanna_2_github_2acp_2specs_2001-acp-protocol-spec_2checklists_2requirements.html#autotoc_md110',1,'']]],
+  ['results_20iteration_202_20',['Validation Results (Iteration 2)',['../md__2_users_2paulzanna_2_github_2acp_2specs_2001-acp-protocol-spec_2checklists_2requirements.html#autotoc_md112',1,'']]],
+  ['root_21',['Source Code (repository root)',['../md__2_users_2paulzanna_2_github_2acp_2specs_2001-acp-protocol-spec_2plan.html#autotoc_md136',1,'']]]
+];

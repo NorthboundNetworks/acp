@@ -1,0 +1,26 @@
+var searchData=
+[
+  ['fallbacks_0',['Phase 6 — User Story 4 (P3): Platform Abstraction Fallbacks',['../md__2_users_2paulzanna_2_github_2acp_2specs_2001-acp-protocol-spec_2tasks.html#autotoc_md180',1,'']]],
+  ['fallbacks_20priority_3a_20p3_1',['User Story 4 - Platform Abstraction Fallbacks (Priority: P3)',['../md__2_users_2paulzanna_2_github_2acp_2specs_2001-acp-protocol-spec_2spec.html#autotoc_md165',1,'']]],
+  ['fast_20build_20cmake_2',['Fast Build (CMake)',['../md__b_u_i_l_d.html#autotoc_md60',1,'']]],
+  ['fast_20build_20make_3',['Fast Build (Make)',['../md__b_u_i_l_d.html#autotoc_md61',1,'']]],
+  ['feature_4',['Documentation (this feature)',['../md__2_users_2paulzanna_2_github_2acp_2specs_2001-acp-protocol-spec_2plan.html#autotoc_md135',1,'']]],
+  ['feature_20readiness_5',['Feature Readiness',['../md__2_users_2paulzanna_2_github_2acp_2specs_2001-acp-protocol-spec_2checklists_2requirements.html#autotoc_md107',1,'']]],
+  ['feature_20specification_3a_20acp_20protocol_20project_20requirements_20and_20deliverables_6',['Feature Specification: ACP Protocol Project Requirements and Deliverables',['../md__2_users_2paulzanna_2_github_2acp_2specs_2001-acp-protocol-spec_2spec.html',1,'']]],
+  ['features_7',['Features',['../md_acp__comm__spec__v0-2.html#autotoc_md21',1,'Extensibility &amp;amp; Future Features'],['../md_acp__comm__spec__v0-3.html#autotoc_md49',1,'Extensibility &amp;amp; Future Features']]],
+  ['features_20100_20complete_8',['&lt;b&gt;Core Protocol Features (100% Complete)&lt;/b&gt;',['../md__2_users_2paulzanna_2_github_2acp_2specs_2001-acp-protocol-spec_2tasks.html#autotoc_md186',1,'']]],
+  ['final_20phase_20—_20polish_20cross_20cutting_9',['Final Phase — Polish &amp;amp; Cross-Cutting',['../md__2_users_2paulzanna_2_github_2acp_2specs_2001-acp-protocol-spec_2tasks.html#autotoc_md181',1,'']]],
+  ['flags_10',['flags',['../structacp__keystore__entry__t.html#aa8bf1e6bad4ec29228acf0e87ab99d04',1,'acp_keystore_entry_t::flags'],['../structacp__frame__t.html#ae0130596e6cd38228c9110b30717639c',1,'acp_frame_t::flags']]],
+  ['format_11',['Data model and wire format',['..//Users/paulzanna/Github/acp/README.md#autotoc_md99',1,'']]],
+  ['foundational_20blocking_20prerequisites_12',['Phase 2 — Foundational (blocking prerequisites)',['../md__2_users_2paulzanna_2_github_2acp_2specs_2001-acp-protocol-spec_2tasks.html#autotoc_md175',1,'']]],
+  ['frame_13',['Frame',['../md__2_users_2paulzanna_2_github_2acp_2specs_2001-acp-protocol-spec_2data-model.html#autotoc_md124',1,'ACP Frame'],['../md__2_users_2paulzanna_2_github_2acp_2specs_2001-acp-protocol-spec_2tasks.html#autotoc_md176',1,'Phase 3 — User Story 1 (P1): Encode/Decode Telemetry Frame']]],
+  ['frame_20header_20and_20endianness_14',['Frame Header and Endianness',['../md__2_users_2paulzanna_2_github_2acp_2specs_2001-acp-protocol-spec_2research.html#autotoc_md148',1,'']]],
+  ['frame_20priority_3a_20p1_15',['User Story 1 - Encode/Decode Telemetry Frame (Priority: P1)',['../md__2_users_2paulzanna_2_github_2acp_2specs_2001-acp-protocol-spec_2spec.html#autotoc_md159',1,'']]],
+  ['frame_20structure_20v0_202_16',['Protocol Frame Structure (v0.2)',['../md_acp__comm__spec__v0-2.html#autotoc_md5',1,'']]],
+  ['frame_20structure_20v0_203_17',['Protocol Frame Structure (v0.3)',['../md_acp__comm__spec__v0-3.html#autotoc_md33',1,'']]],
+  ['framing_20and_20integrity_18',['Framing and Integrity',['../md__2_users_2paulzanna_2_github_2acp_2specs_2001-acp-protocol-spec_2contracts_2c-api.html#autotoc_md117',1,'Framing and Integrity'],['../md__2_users_2paulzanna_2_github_2acp_2specs_2001-acp-protocol-spec_2research.html#autotoc_md146',1,'Framing and Integrity']]],
+  ['from_20linux_20mingw_19',['Windows from Linux (MinGW)',['../md__b_u_i_l_d.html#autotoc_md83',1,'']]],
+  ['functional_20requirements_20',['Functional Requirements',['../md__2_users_2paulzanna_2_github_2acp_2specs_2001-acp-protocol-spec_2spec.html#autotoc_md168',1,'']]],
+  ['functions_21',['Functions',['../md__2_users_2paulzanna_2_github_2acp_2specs_2001-acp-protocol-spec_2contracts_2c-api.html#autotoc_md116',1,'']]],
+  ['future_20features_22',['Future Features',['../md_acp__comm__spec__v0-2.html#autotoc_md21',1,'Extensibility &amp;amp; Future Features'],['../md_acp__comm__spec__v0-3.html#autotoc_md49',1,'Extensibility &amp;amp; Future Features']]]
+];
