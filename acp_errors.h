@@ -32,6 +32,8 @@
 #ifndef ACP_ERRORS_H
 #define ACP_ERRORS_H
 
+#include "acp_protocol.h" // For acp_result_t declaration
+
 #ifdef __cplusplus
 extern "C"
 {
@@ -238,7 +240,7 @@ extern "C"
      * @param err Error code
      * @return Static error message string
      */
-    const char *acp_error_string(int err);
+    const char *acp_error_string(acp_result_t err);
 
     /**
      * @brief Get error category name

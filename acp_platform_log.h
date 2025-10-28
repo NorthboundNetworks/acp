@@ -34,10 +34,17 @@ extern "C"
 /**
  * @brief Log levels for ACP platform logging.
  */
+#ifdef ACP_DISABLE_LOGGING
+#define ACP_LOG_ERROR(...)
+#define ACP_LOG_WARN(...)
+#define ACP_LOG_INFO(...)
+#define ACP_LOG_DEBUG(...)
+#else
 #define ACP_LOG_ERROR(...) acp_platform_log("ERROR", __VA_ARGS__)
 #define ACP_LOG_WARN(...) acp_platform_log("WARN", __VA_ARGS__)
 #define ACP_LOG_INFO(...) acp_platform_log("INFO", __VA_ARGS__)
 #define ACP_LOG_DEBUG(...) acp_platform_log("DEBUG", __VA_ARGS__)
+#endif
 
     /**
      * @brief Default logging implementation.
@@ -45,17 +52,27 @@ extern "C"
      */
     static inline void acp_platform_log(const char *level, const char *fmt, ...)
     {
-        va_list args;
-        va_start(args, fmt);
-        fprintf(stderr, "[ACP][%s] ", level);
+#ifdef ACP_DISABLE_LOGGING
+        (void)level;
+        (void)fmt;
+        return;
+#else
+    va_list args;
+    va_start(args, fmt);
+    fprintf(stderr, "[ACP][%s] ", level);
 
+#ifdef __clang__
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wformat-nonliteral"
-        vfprintf(stderr, fmt, args);
+#endif
+    vfprintf(stderr, fmt, args);
+#ifdef __clang__
 #pragma clang diagnostic pop
+#endif
 
-        fprintf(stderr, "\n");
-        va_end(args);
+    fprintf(stderr, "\n");
+    va_end(args);
+#endif
     }
 
 #ifdef __cplusplus

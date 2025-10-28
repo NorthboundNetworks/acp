@@ -117,7 +117,7 @@ int acp_cobs_decode(const uint8_t *input, size_t input_len,
         remaining--;
 
         /* Validate code byte */
-        if (code == 0 || code > (ACP_COBS_BLOCK_SIZE + 1))
+        if (code == 0)
         {
             return ACP_ERR_COBS_DECODE;
         }
@@ -144,7 +144,7 @@ int acp_cobs_decode(const uint8_t *input, size_t input_len,
         remaining -= block_len;
 
         /* Add zero byte if this wasn't the last block */
-        if (remaining > 0 && code != (ACP_COBS_BLOCK_SIZE + 1))
+        if (remaining > 0 && code != (uint8_t)(ACP_COBS_BLOCK_SIZE + 1))
         {
             *dst++ = 0;
             decoded++;
@@ -191,8 +191,8 @@ int acp_cobs_validate(const uint8_t *data, size_t len)
     {
         uint8_t code = data[pos];
 
-        /* Code must be 1-255 */
-        if (code == 0 || code > (ACP_COBS_BLOCK_SIZE + 1))
+        /* Code must be non-zero; upper bound is implicit for uint8_t */
+        if (code == 0)
         {
             return 0;
         }
