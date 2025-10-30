@@ -298,6 +298,20 @@ int acp_platform_keystore_get_key(uint32_t key_id, uint8_t *key_buffer, size_t b
 
 **Note:** Only time functions are strictly required. Other functions can return appropriate error codes if not needed.
 
+
+## TODO
+
+- Add Algorithm ID (1 byte) and Key ID (1–2 bytes) to the auth trailer; reserve codes for HMAC-256-16, HMAC-256-32, and AEAD-CC20P1305.
+- Mandate CRC-inside-MAC; make the order canonical and documented.
+- Define SEQ as 32-bit with a sliding window (e.g., 64) and explicit rollover rules.
+- Add Capability TLV and Error/NACK frame.
+- Publish test vectors (small/large payloads, wrong CRC, wrong MAC, replay, reordering).
+- Provide UART/UDP/TCP binding sections with examples.
+- Ship a fuzz target for the framer/parser in tests/ and a sanitiser build.
+- Add a PING/PONG keepalive with default intervals/timeouts.
+- Cross-platform compilation.
+
+
 ## Build Matrix
 
 | Platform | Compiler | Static Lib | Shared Lib | CI Status |
